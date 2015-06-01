@@ -9,3 +9,19 @@ SimpleCache cache = new SimpleCache(new EhCacheConfiguration());
 cache.put("name", "simple-cache");
 System.out.println("name: " + cache.get("name"));
 ```
+
+在 Spring 中，只需要配置为下面的样子：
+
+```xml
+<bean id="simpleCache" class="com.hyd.simplecache.SimpleCache" destroy-method="close">
+    <constructor-arg ref="memcachedConf"/>   <!-- 修改这里 -->
+</bean>
+
+<bean id="ehcacheConf" class="com.hyd.simplecache.EhCacheConfiguration"/>
+
+<bean id="memcachedConf" class="com.hyd.simplecache.MemcachedConfiguration">
+    <property name="addresses" value="192.168.1.10:12345"/>
+</bean>
+```
+
+通过修改 simpleCache 的构造方法参数，即可在 EhCache 和 Memcached 之间切换，无需修改 Java 代码。
