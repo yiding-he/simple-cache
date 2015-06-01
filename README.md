@@ -25,3 +25,5 @@ System.out.println("name: " + cache.get("name"));
 ```
 
 通过修改 simpleCache 的构造方法参数，即可在 EhCache 和 Memcached 之间切换，无需修改 Java 代码。
+
+更多的文档请参考 [WIKI](http://git.oschina.net/yidinghe/simple-cache/wikis/home)
