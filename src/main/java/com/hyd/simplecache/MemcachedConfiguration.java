@@ -33,8 +33,9 @@ public class MemcachedConfiguration implements CacheConfiguration {
         parseAddress(addresses);
     }
 
-    private void parseAddress(String addresses) {
-        String[] addrs = addresses.split(";");
+    public static List<WeightedAddress> psrseAddressList(String addresses) {
+        String[] addrs = addresses.split(";|,");
+        List<WeightedAddress> list = new ArrayList<WeightedAddress>();
 
         for (String addr : addrs) {
             addr = addr.trim();
@@ -54,8 +55,15 @@ public class MemcachedConfiguration implements CacheConfiguration {
             int port = Integer.parseInt(addr.substring(splitIndex1 + 1, splitIndex2));
             int weight = Integer.parseInt(addr.substring(splitIndex2 + 1));
 
-            this.addresses.add(new WeightedAddress(host, port, weight));
+            WeightedAddress a = new WeightedAddress(host, port, weight);
+            list.add(a);
         }
+        return list;
+    }
+
+    private void parseAddress(String addresses) {
+        List<WeightedAddress> list = psrseAddressList(addresses);
+        this.addresses.addAll(list);
     }
 
     public int getDefaultCacheExpireSeconds() {

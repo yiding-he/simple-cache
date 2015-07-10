@@ -99,9 +99,10 @@ public abstract class LazyCache<T extends Serializable> {
 
                 // 如果取不到数据，则放一个包含 null 的 Element 到缓存里，一段
                 // 时间内就不会再反复查询这个不存在的数据了
-                if (value == null) {
-                    log.debug("Saving null for key '{}' for {} second(s).", cacheKey, getRetryInterval());
-                    this.simpleCache.putElement(cacheKey, new Element(null), getRetryInterval());
+                int retryInterval = getRetryInterval();
+                if (value == null && retryInterval > 0) {
+                    log.debug("Saving null for key '{}' for {} second(s).", cacheKey, retryInterval);
+                    this.simpleCache.putElement(cacheKey, new Element(null), retryInterval);
                 }
             } else {
                 value = (T) element.getValue();
@@ -127,7 +128,7 @@ public abstract class LazyCache<T extends Serializable> {
      * @return 失败重试间隔时间
      */
     protected int getRetryInterval() {
-        return 1;
+        return 0;
     }
 
     /**
