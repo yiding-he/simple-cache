@@ -23,6 +23,8 @@ public abstract class AsynchronizedLazyCache<T extends Serializable> extends Laz
 
     public static final int DEFAULT_POOL_SIZE = 10;
 
+    private static final Logger log = LoggerFactory.getLogger(LazyCache.class);
+
     private static final Logger LOG = LoggerFactory.getLogger(AsynchronizedLazyCache.class);
 
     /**
@@ -77,6 +79,14 @@ public abstract class AsynchronizedLazyCache<T extends Serializable> extends Laz
                 } else {
                     scheduleRefreshTask(cacheKey, parameters);
                     value = (T) element.getValue();
+                }
+
+                // 如果取不到数据，则放一个包含 null 的 Element 到缓存里，一段
+                // 时间内就不会再反复查询这个不存在的数据了
+                int retryInterval = getRetryInterval();
+                if (value == null && retryInterval > 0) {
+                    log.debug("Saving null for key '{}' for {} second(s).", cacheKey, retryInterval);
+                    this.simpleCache.putElement(cacheKey, new Element(null), retryInterval);
                 }
 
                 // 这里总是会更新缓存的访问时间，在异步操作下这样可以欺骗访问
