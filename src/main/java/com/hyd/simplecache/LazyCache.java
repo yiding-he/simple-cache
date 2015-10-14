@@ -150,8 +150,4 @@ public abstract class LazyCache<T extends Serializable> {
         String cacheKey = getCacheKey(JsonUtils.toJson(parameters));
         this.simpleCache.delete(cacheKey);
     }
-
-    public void clear() {
-        this.simpleCache.clear();
-    }
 }
