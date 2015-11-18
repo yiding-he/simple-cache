@@ -71,7 +71,25 @@ public class MemcachedAdapter implements CacheAdapter {
         this.client.beginWithNamespace(configuration.getNamespace());
 
         try {
+            if (configuration.getTimeToIdle() > 0) {
+                this.client.touch(key, configuration.getTimeToIdle());
+            }
             return this.client.get(key);
+        } catch (Exception e) {
+            throw new SimpleCacheException(e);
+        } finally {
+            this.client.endWithNamespace();
+        }
+    }
+
+    @Override
+    public void touch(String key) {
+        this.client.beginWithNamespace(configuration.getNamespace());
+
+        try {
+            if (configuration.getTimeToIdle() > 0) {
+                this.client.touch(key, configuration.getTimeToIdle());
+            }
         } catch (Exception e) {
             throw new SimpleCacheException(e);
         } finally {

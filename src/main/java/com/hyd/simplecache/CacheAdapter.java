@@ -91,4 +91,6 @@ public interface CacheAdapter {
      * @return 如果 key 存在则返回 true
      */
     boolean keyExists(String key);
+
+    void touch(String key);
 }

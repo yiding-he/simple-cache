@@ -16,6 +16,16 @@ public class RedisConfiguration implements CacheConfiguration {
 
     private int timeToLiveSeconds;
 
+    private int timeToIdleSeconds;
+
+    public int getTimeToIdleSeconds() {
+        return timeToIdleSeconds;
+    }
+
+    public void setTimeToIdleSeconds(int timeToIdleSeconds) {
+        this.timeToIdleSeconds = timeToIdleSeconds;
+    }
+
     public int getTimeToLiveSeconds() {
         return timeToLiveSeconds;
     }

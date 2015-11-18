@@ -39,6 +39,11 @@ public class EhCacheAdapter implements CacheAdapter {
     }
 
     @Override
+    public void touch(String key) {
+        this.cache.get(key);    // 触发 timeToIdle
+    }
+
+    @Override
     public Serializable get(String key) {
         Element element = this.cache.get(key);
         return element == null ? null : (Serializable) element.getObjectValue();

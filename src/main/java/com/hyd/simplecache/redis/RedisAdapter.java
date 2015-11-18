@@ -71,7 +71,24 @@ public class RedisAdapter implements CacheAdapter {
 
             @Override
             public Serializable execute(Jedis jedis) {
+                if (configuration.getTimeToIdleSeconds() > 0) {
+                    jedis.expire(key, configuration.getTimeToIdleSeconds());
+                }
                 return deserialize(jedis.get(key.getBytes()));
+            }
+        });
+    }
+
+    @Override
+    public void touch(final String key) {
+        withJedis(new JedisExecutor<Void>() {
+
+            @Override
+            public Void execute(Jedis jedis) {
+                if (configuration.getTimeToIdleSeconds() > 0) {
+                    jedis.expire(key, configuration.getTimeToIdleSeconds());
+                }
+                return null;
             }
         });
     }

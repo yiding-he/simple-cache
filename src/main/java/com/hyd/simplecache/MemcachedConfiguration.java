@@ -23,6 +23,8 @@ public class MemcachedConfiguration implements CacheConfiguration {
 
     private int defaultCacheExpireSeconds = Integer.MAX_VALUE;  // 保存时间
 
+    private int timeToIdle = 0;                                 // 闲置超时时间（秒）
+
     private List<WeightedAddress> addresses = new ArrayList<WeightedAddress>();
 
     public MemcachedConfiguration() {
@@ -64,6 +66,14 @@ public class MemcachedConfiguration implements CacheConfiguration {
     private void parseAddress(String addresses) {
         List<WeightedAddress> list = psrseAddressList(addresses);
         this.addresses.addAll(list);
+    }
+
+    public int getTimeToIdle() {
+        return timeToIdle;
+    }
+
+    public void setTimeToIdle(int timeToIdle) {
+        this.timeToIdle = timeToIdle;
     }
 
     public int getDefaultCacheExpireSeconds() {

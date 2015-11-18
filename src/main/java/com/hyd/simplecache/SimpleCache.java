@@ -9,7 +9,7 @@ import java.io.Serializable;
  * <p>SimpleCache 的主要使用类。</p>
  * <p>这里对内容的存取都使用了 {@link Element} 类进行包装，存放的时候包装成 Element
  * 对象，取出的时候如果发现是 Element 对象，则取对象里面的值并返回。</p>
- * <p>
+ * <p/>
  * 一个简单的例子：
  * <pre>
  *     SimpleCache cache = new SimpleCache(new EhCacheConfiguration());
@@ -105,6 +105,15 @@ public class SimpleCache {
     public void put(String key, Serializable value, int timeToLive) {
         Element element = new Element(value);
         this.cacheAdapter.put(key, element, timeToLive);
+    }
+
+    /**
+     * 更新缓存的超时时间，超时时间由属性 timeToIdle 决定。
+     *
+     * @param key 要更新超时时间的缓存 key
+     */
+    public void touch(String key) {
+        this.cacheAdapter.touch(key);
     }
 
     /**
