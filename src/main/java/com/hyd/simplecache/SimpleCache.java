@@ -55,7 +55,6 @@ public class SimpleCache {
      * @param element 要缓存的元素
      */
     public void putElement(String key, Element element) {
-        checkStatus();
         this.cacheAdapter.put(key, element, false);
     }
 
@@ -67,7 +66,6 @@ public class SimpleCache {
      * @param timeToLiveSeconds 缓存时间，0 或负数表示永久保存
      */
     public void putElement(String key, Element element, int timeToLiveSeconds) {
-        checkStatus();
         if (timeToLiveSeconds > 0) {
             this.cacheAdapter.put(key, element, timeToLiveSeconds);
         } else {
@@ -82,7 +80,6 @@ public class SimpleCache {
      * @param value 对象值
      */
     public void put(String key, Serializable value) {
-        checkStatus();
         Element element = new Element(value);
         this.cacheAdapter.put(key, element, false);
     }
@@ -94,7 +91,6 @@ public class SimpleCache {
      * @param value 对象值
      */
     public void put(String key, Serializable value, boolean forever) {
-        checkStatus();
         Element element = new Element(value);
         this.cacheAdapter.put(key, element, forever);
     }
@@ -107,7 +103,6 @@ public class SimpleCache {
      * @param timeToLive 本条缓存的保存时长（秒）
      */
     public void put(String key, Serializable value, int timeToLive) {
-        checkStatus();
         Element element = new Element(value);
         this.cacheAdapter.put(key, element, timeToLive);
     }
@@ -120,8 +115,6 @@ public class SimpleCache {
      * @return 对象值
      */
     public <T extends Serializable> T get(String key) {
-        checkStatus();
-
         Serializable value = this.cacheAdapter.get(key);
 
         if (value == null) {
@@ -150,7 +143,6 @@ public class SimpleCache {
      */
     @SuppressWarnings("unchecked")
     public <T extends Serializable> T get(String key, Class<T> type) {
-        checkStatus();
         Serializable value = get(key);
 
         if (value == null) {
@@ -175,7 +167,6 @@ public class SimpleCache {
      * @throws SimpleCacheException 如果缓存中的元素类型不是 Element
      */
     public <E extends Serializable> Element<E> getElement(String key) throws SimpleCacheException {
-        checkStatus();
         Serializable value = this.cacheAdapter.get(key);
 
         if (value == null) {
@@ -207,19 +198,10 @@ public class SimpleCache {
     }
 
     public boolean compareAndSet(String key, Serializable findValue, Serializable setValue) {
-        checkStatus();
         return this.cacheAdapter.compareAndSet(key, findValue, setValue);
     }
 
     public void close() {
-        checkStatus();
         this.cacheAdapter.dispose();
-    }
-
-    private void checkStatus() {
-        if (this.cacheAdapter == null) {
-            throw new IllegalStateException(
-                    "SimpleCache instance is not ready, please call setCacheConfiguration() first.");
-        }
     }
 }
