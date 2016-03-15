@@ -9,7 +9,7 @@ import java.io.Serializable;
  */
 public class Element<E extends Serializable> implements Serializable {
 
-    // 这个值不要动，动了就会导致取不到数据
+    // DO NOT CHANGE THIS OR YOU MAY GET SERIALIZATION ERROR
     public static final long serialVersionUID = -1239539875870833481L;
 
     private E value;
