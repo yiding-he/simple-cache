@@ -6,8 +6,13 @@ simple-cache 是一个为不同种类的缓存提供统一 API 的类库。其�
 
 ```java
 SimpleCache cache = new SimpleCache(new EhCacheConfiguration());
-cache.put("name", "simple-cache");
+
+// 简单存取
+cache.put("name", queryName());
 System.out.println("name: " + cache.get("name"));
+
+// 惰性存取
+String name = cache.get("name", () -> queryName());
 ```
 
 在 Spring 中，只需要配置为下面的样子：
