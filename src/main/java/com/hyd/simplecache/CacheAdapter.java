@@ -70,7 +70,7 @@ public interface CacheAdapter {
     boolean compareAndSet(String key, Serializable findValue, Serializable setValue) throws UnsupportedOperationException;
 
     /**
-     * 关闭缓存客户端对象
+     * 关闭缓存客户端对象，释放相关资源
      */
     void dispose();
 

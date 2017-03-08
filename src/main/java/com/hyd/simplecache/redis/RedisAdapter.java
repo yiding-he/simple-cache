@@ -151,6 +151,7 @@ public class RedisAdapter implements CacheAdapter {
     @Override
     public void dispose() {
         this.jedisPool.destroy();
+        this.jedisPool = null;
     }
 
     @Override

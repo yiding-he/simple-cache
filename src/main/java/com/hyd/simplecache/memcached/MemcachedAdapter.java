@@ -183,6 +183,7 @@ public class MemcachedAdapter implements CacheAdapter {
     public void dispose() {
         try {
             this.client.shutdown();
+            this.client = null;
         } catch (IOException e) {
             log.warn("Failed to shutdown memcached client:", e);
         }

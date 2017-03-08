@@ -87,7 +87,7 @@ public class EhCacheAdapter implements CacheAdapter {
 
     @Override
     public void dispose() {
-        // Ehcache doesn't have this operation
+        CacheManager.getInstance().removeCache(this.cache.getName());
     }
 
     @SuppressWarnings("unchecked")
