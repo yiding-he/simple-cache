@@ -159,6 +159,28 @@ public class SimpleCache {
         return (T) value;
     }
 
+    public <T extends Serializable> T get(String key, Provider<T> provider, int cacheTimeoutSeconds) {
+        Serializable value = this.cacheAdapter.get(key);
+
+        if (value == null) {
+            value = provider.provide();
+            if (value != null) {
+                if (cacheTimeoutSeconds < 0) {
+                    put(key, value, true);
+                } else if (cacheTimeoutSeconds > 0) {
+                    put(key, value, cacheTimeoutSeconds);
+                }
+            }
+        }
+
+        // 剥去包装
+        if (value instanceof Element) {
+            value = ((Element) value).getValue();
+        }
+
+        return (T) value;
+    }
+
     /**
      * 从缓存中获取对象
      *
@@ -223,13 +245,6 @@ public class SimpleCache {
     public void clear() {
         this.cacheAdapter.clear();
     }
-
-/*
-    // Unsolveable bug with ehcache, i cannot figure out why... see EhCacheAdapterTest
-    public boolean compareAndSet(String key, Serializable findValue, Serializable setValue) {
-        return this.cacheAdapter.compareAndSet(key, findValue, setValue);
-    }
-*/
 
     public void close() {
         this.cacheAdapter.dispose();
