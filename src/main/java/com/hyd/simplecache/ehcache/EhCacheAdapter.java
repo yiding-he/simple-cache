@@ -28,9 +28,20 @@ public class EhCacheAdapter implements CacheAdapter {
      */
     public EhCacheAdapter(EhCacheConfiguration configuration) {
         this.configuration = configuration;
-        this.cache = new Cache(configuration.getConfiguration());
+        initCache(configuration);
+    }
 
-        CacheManager.getInstance().addCache(this.cache);
+    private void initCache(EhCacheConfiguration configuration) {
+        CacheManager cacheManager = CacheManager.getInstance();
+        String cacheName = configuration.getName();
+
+        // 如果 CacheManager 已经有了同名 Cache，则使用已有的 Cache
+        if (cacheManager.cacheExists(cacheName)) {
+            this.cache = cacheManager.getCache(cacheName);
+        } else {
+            this.cache = new Cache(configuration.getConfiguration());
+            cacheManager.addCache(this.cache);
+        }
     }
 
     @Override

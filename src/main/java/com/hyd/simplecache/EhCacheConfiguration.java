@@ -109,6 +109,10 @@ public class EhCacheConfiguration implements CacheConfiguration {
         configuration.setName(value);
     }
 
+    public String getName() {
+        return configuration == null ? null : configuration.getName();
+    }
+
     public void setOverflowToOffHeap(boolean value) {
         configuration.setOverflowToOffHeap(value);
     }
