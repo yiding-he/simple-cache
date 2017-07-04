@@ -62,7 +62,8 @@ public abstract class LazyCache<T extends Serializable> {
     protected abstract T fetch(Object[] parameters) throws Exception;
 
     protected String getCacheKey(String key) {
-        return getPrefix() + SEPERATOR + key;
+        // Memcached 不允许 key 中带有空白字符和控制字符
+        return (getPrefix() + SEPERATOR + key).replaceAll("\\s+", "");
     }
 
     /**

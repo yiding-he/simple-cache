@@ -111,6 +111,26 @@ public class LazyCacheTest {
         t3.join();
     }
 
+    @Test
+    public void testMemcachedInvalidCache() throws Exception {
+        MemcachedConfiguration config = new MemcachedConfiguration("test", "192.168.1.180:13000");
+        SimpleCache simpleCache = new SimpleCache(config);
+        final UserDAO userDAO = new UserDAO();
+
+        LazyCache<User> userLazyCache = new LazyCache<User>(simpleCache) {
+            @Override
+            protected User fetch(Object[] parameters) throws Exception {
+                String username = (String) parameters[0];
+                return userDAO.findUserByName(username);
+            }
+        };
+
+        System.out.println(userLazyCache.get("user1"));
+        System.out.println(userLazyCache.get("user1"));
+        System.out.println(userLazyCache.get("user2"));
+        System.out.println(userLazyCache.get("user2"));
+    }
+
     private static class UserDAO {
 
         public User findUserByName(String username) {
