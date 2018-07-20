@@ -3,9 +3,10 @@ package com.hyd.simplecache.redis;
 import com.hyd.simplecache.CacheAdapter;
 import com.hyd.simplecache.CacheConfiguration;
 import com.hyd.simplecache.RedisConfiguration;
-import com.hyd.simplecache.utils.Str;
 import org.nustaq.serialization.FSTConfiguration;
-import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPoolConfig;
+import redis.clients.jedis.ShardedJedis;
+import redis.clients.jedis.ShardedJedisPool;
 
 import java.util.Iterator;
 
@@ -25,15 +26,11 @@ public class RedisAdapter implements CacheAdapter {
 
     private RedisConfiguration configuration;
 
-    private Jedis jedis;
+    private final ShardedJedisPool shardedJedisPool;
 
     public RedisAdapter(RedisConfiguration configuration) {
         this.configuration = configuration;
-        this.jedis = new Jedis(configuration.getServer(), configuration.getPort());
-
-        if (!Str.isEmpty(configuration.getPassword())) {
-            this.jedis.auth(configuration.getPassword());
-        }
+        shardedJedisPool = new ShardedJedisPool(new JedisPoolConfig(), configuration.getShardInfoList());
     }
 
     public static Object deserialize(byte[] bytes) {
@@ -50,6 +47,7 @@ public class RedisAdapter implements CacheAdapter {
     }
 
     private <T> T withJedis(JedisExecutor<T> executor) {
+        ShardedJedis jedis = shardedJedisPool.getResource();
         try {
             return executor.execute(jedis);
         } finally {
@@ -64,7 +62,7 @@ public class RedisAdapter implements CacheAdapter {
         return withJedis(new JedisExecutor<Object>() {
 
             @Override
-            public Object execute(Jedis jedis) {
+            public Object execute(ShardedJedis jedis) {
                 if (configuration.getTimeToIdleSeconds() > 0) {
                     jedis.expire(key, configuration.getTimeToIdleSeconds());
                 }
@@ -85,7 +83,7 @@ public class RedisAdapter implements CacheAdapter {
         withJedis(new JedisExecutor<Void>() {
 
             @Override
-            public Void execute(Jedis jedis) {
+            public Void execute(ShardedJedis jedis) {
                 if (configuration.getTimeToIdleSeconds() > 0) {
                     jedis.expire(key, configuration.getTimeToIdleSeconds());
                 }
@@ -101,7 +99,7 @@ public class RedisAdapter implements CacheAdapter {
         withJedis(new JedisExecutor<Void>() {
 
             @Override
-            public Void execute(Jedis jedis) {
+            public Void execute(ShardedJedis jedis) {
                 if (forever) {
                     jedis.set(key.getBytes(), serialize(value));
                 } else {
@@ -118,7 +116,7 @@ public class RedisAdapter implements CacheAdapter {
         withJedis(new JedisExecutor<Void>() {
 
             @Override
-            public Void execute(Jedis jedis) {
+            public Void execute(ShardedJedis jedis) {
                 jedis.setex(key.getBytes(), timeToLiveSeconds, serialize(value));
                 return null;
             }
@@ -130,7 +128,7 @@ public class RedisAdapter implements CacheAdapter {
         withJedis(new JedisExecutor<Void>() {
 
             @Override
-            public Void execute(Jedis jedis) {
+            public Void execute(ShardedJedis jedis) {
                 jedis.del(key.getBytes());
                 return null;
             }
@@ -151,7 +149,7 @@ public class RedisAdapter implements CacheAdapter {
 
     @Override
     public void dispose() {
-        this.jedis.close();
+        this.shardedJedisPool.close();
     }
 
     @Override
@@ -164,7 +162,7 @@ public class RedisAdapter implements CacheAdapter {
         return withJedis(new JedisExecutor<Boolean>() {
 
             @Override
-            public Boolean execute(Jedis jedis) {
+            public Boolean execute(ShardedJedis jedis) {
                 return jedis.exists(key.getBytes());
             }
         });
@@ -172,6 +170,6 @@ public class RedisAdapter implements CacheAdapter {
 
     private interface JedisExecutor<T> {
 
-        T execute(Jedis jedis);
+        T execute(ShardedJedis jedis);
     }
 }
