@@ -3,12 +3,10 @@ package com.hyd.simplecache.redis;
 import com.hyd.simplecache.CacheAdapter;
 import com.hyd.simplecache.CacheConfiguration;
 import com.hyd.simplecache.RedisConfiguration;
-import com.hyd.simplecache.SimpleCacheException;
+import com.hyd.simplecache.utils.Str;
+import org.nustaq.serialization.FSTConfiguration;
 import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPoolConfig;
 
-import java.io.*;
 import java.util.Iterator;
 
 /**
@@ -18,35 +16,32 @@ import java.util.Iterator;
  */
 public class RedisAdapter implements CacheAdapter {
 
+    private static FSTConfiguration FST;
+
+    static {
+        FST = FSTConfiguration.createDefaultConfiguration();
+        FST.setForceSerializable(true);
+    }
+
     private RedisConfiguration configuration;
 
-    private JedisPool jedisPool;
+    private Jedis jedis;
 
     public RedisAdapter(RedisConfiguration configuration) {
         this.configuration = configuration;
-        this.jedisPool = new JedisPool(new JedisPoolConfig(),
-                configuration.getServer(), configuration.getPort(), 1000, configuration.getPassword());
-    }
+        this.jedis = new Jedis(configuration.getServer(), configuration.getPort());
 
-    public static Serializable deserialize(byte[] bytes) {
-        try {
-            ByteArrayInputStream in = new ByteArrayInputStream(bytes);
-            return (Serializable) new ObjectInputStream(in).readObject();
-        } catch (java.io.InvalidClassException e) {
-            return null;
-        } catch (Exception e) {
-            throw new SimpleCacheException(e);
+        if (!Str.isEmpty(configuration.getPassword())) {
+            this.jedis.auth(configuration.getPassword());
         }
     }
 
-    public static byte[] serialize(Serializable serializable) {
-        try {
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            new ObjectOutputStream(out).writeObject(serializable);
-            return out.toByteArray();
-        } catch (IOException e) {
-            throw new SimpleCacheException(e);
-        }
+    public static Object deserialize(byte[] bytes) {
+        return FST.asObject(bytes);
+    }
+
+    public static byte[] serialize(Object serializable) {
+        return FST.asByteArray(serializable);
     }
 
     @Override
@@ -55,26 +50,32 @@ public class RedisAdapter implements CacheAdapter {
     }
 
     private <T> T withJedis(JedisExecutor<T> executor) {
-        Jedis jedis = this.jedisPool.getResource();
         try {
             return executor.execute(jedis);
         } finally {
-            this.jedisPool.returnResource(jedis);
+            jedis.close();
         }
     }
 
     ////////////////////////////////////////////////////////////////
 
     @Override
-    public Serializable get(final String key) {
-        return withJedis(new JedisExecutor<Serializable>() {
+    public Object get(final String key) {
+        return withJedis(new JedisExecutor<Object>() {
 
             @Override
-            public Serializable execute(Jedis jedis) {
+            public Object execute(Jedis jedis) {
                 if (configuration.getTimeToIdleSeconds() > 0) {
                     jedis.expire(key, configuration.getTimeToIdleSeconds());
                 }
-                return deserialize(jedis.get(key.getBytes()));
+
+                byte[] bytes = jedis.get(key.getBytes());
+
+                if (bytes == null) {
+                    return null;
+                } else {
+                    return deserialize(bytes);
+                }
             }
         });
     }
@@ -96,7 +97,7 @@ public class RedisAdapter implements CacheAdapter {
     ////////////////////////////////////////////////////////////////
 
     @Override
-    public void put(final String key, final Serializable value, final boolean forever) {
+    public void put(final String key, final Object value, final boolean forever) {
         withJedis(new JedisExecutor<Void>() {
 
             @Override
@@ -113,7 +114,7 @@ public class RedisAdapter implements CacheAdapter {
     }
 
     @Override
-    public void put(final String key, final Serializable value, final int timeToLiveSeconds) {
+    public void put(final String key, final Object value, final int timeToLiveSeconds) {
         withJedis(new JedisExecutor<Void>() {
 
             @Override
@@ -143,15 +144,14 @@ public class RedisAdapter implements CacheAdapter {
 
     @Override
     public boolean compareAndSet(
-            final String key, final Serializable findValue, final Serializable setValue
+            final String key, final Object findValue, final Object setValue
     ) throws UnsupportedOperationException {
         throw new UnsupportedOperationException("cas operation is not supported by redis.");
     }
 
     @Override
     public void dispose() {
-        this.jedisPool.destroy();
-        this.jedisPool = null;
+        this.jedis.close();
     }
 
     @Override

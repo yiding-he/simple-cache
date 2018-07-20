@@ -1,6 +1,5 @@
 package com.hyd.simplecache;
 
-import java.io.Serializable;
 import java.util.Iterator;
 
 /**
@@ -24,7 +23,7 @@ public interface CacheAdapter {
      *
      * @return 缓存值
      */
-    Serializable get(String key);
+    Object get(String key);
 
     /**
      * 设置缓存值
@@ -33,7 +32,7 @@ public interface CacheAdapter {
      * @param value   缓存值
      * @param forever 是否永久保存
      */
-    void put(String key, Serializable value, boolean forever);
+    void put(String key, Object value, boolean forever);
 
     /**
      * 设置缓存值
@@ -42,7 +41,7 @@ public interface CacheAdapter {
      * @param value             缓存值
      * @param timeToLiveSeconds 本条缓存的保存时长（秒）
      */
-    void put(String key, Serializable value, int timeToLiveSeconds);
+    void put(String key, Object value, int timeToLiveSeconds);
 
     /**
      * 删除缓存
@@ -67,7 +66,7 @@ public interface CacheAdapter {
      *
      * @throws UnsupportedOperationException 如果缓存不支持该操作
      */
-    boolean compareAndSet(String key, Serializable findValue, Serializable setValue) throws UnsupportedOperationException;
+    boolean compareAndSet(String key, Object findValue, Object setValue) throws UnsupportedOperationException;
 
     /**
      * 关闭缓存客户端对象，释放相关资源

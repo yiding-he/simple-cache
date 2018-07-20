@@ -7,7 +7,6 @@ import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
 
-import java.io.Serializable;
 import java.util.Iterator;
 
 /**
@@ -55,13 +54,13 @@ public class EhCacheAdapter implements CacheAdapter {
     }
 
     @Override
-    public Serializable get(String key) {
+    public Object get(String key) {
         Element element = this.cache.get(key);
-        return element == null ? null : (Serializable) element.getObjectValue();
+        return element == null ? null : (Object) element.getObjectValue();
     }
 
     @Override
-    public void put(String key, Serializable value, boolean forever) {
+    public void put(String key, Object value, boolean forever) {
         Element element = new Element(key, value);
 
         if (forever) {
@@ -72,7 +71,7 @@ public class EhCacheAdapter implements CacheAdapter {
     }
 
     @Override
-    public void put(String key, Serializable value, int timeToLiveSeconds) {
+    public void put(String key, Object value, int timeToLiveSeconds) {
         Element element = new Element(key, value);
         element.setTimeToLive(timeToLiveSeconds);
 
@@ -90,7 +89,7 @@ public class EhCacheAdapter implements CacheAdapter {
     }
 
     @Override
-    public boolean compareAndSet(String key, Serializable findValue, Serializable setValue) {
+    public boolean compareAndSet(String key, Object findValue, Object setValue) {
         Element oldElement = new Element(key, findValue);
         Element newElement = new Element(key, setValue);
         return this.cache.replace(oldElement, newElement);

@@ -22,9 +22,14 @@ public class RedisSimpleCacheTest {
         c.setTimeToLiveSeconds(60);
 
         SimpleCache cache = new SimpleCache(c);
-        User user = cache.get("user");
+        cache.delete("user");
 
-        System.out.println(JsonUtils.toJson(user));
+        User user = cache.get("user");
+        System.out.println("user = " + JsonUtils.toJson(user));  // should be null
+
+        cache.put("user", new User("user1", "pass1"));
+        user = cache.get("user");
+        System.out.println("user = " + JsonUtils.toJson(user));
     }
 
     @Test

@@ -1,5 +1,8 @@
 package com.hyd.simplecache.utils;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * todo: description
  *
@@ -7,16 +10,15 @@ package com.hyd.simplecache.utils;
  */
 public class LockFactoryTest {
 
+    private static Map<String, Integer> map = new HashMap<String, Integer>();
+
     public static void main(String[] args) {
-        new CheckThread("b").start();
-        new CheckThread("a").start();
-        new CheckThread("b").start();
-        new CheckThread("c").start();
-        new CheckThread("a").start();
-        new CheckThread("b").start();
-        new CheckThread("a").start();
-        new CheckThread("c").start();
-        new CheckThread("c").start();
+
+        map.put("A", 0);
+
+        for (int i = 0; i < 50; i++) {
+            new CheckThread("A").start();
+        }
     }
 
     /////////////////////////////////////////////////////////
@@ -31,19 +33,25 @@ public class LockFactoryTest {
 
         @Override
         public void run() {
-            System.out.println(String.format(
-                    "Processing '%s' starting...", key));
-
-            synchronized (LockFactory.getLock(key)) {
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    // ignored
+            for (int i = 0; i < 100; i++) {
+                sleep();
+                synchronized (LockFactory.getLock(key)) {
+                    doSynchronizedThing();
                 }
+            }
+        }
 
-                long currSecond = System.currentTimeMillis() / 1000;
-                System.out.println(String.format(
-                        "Processing '%s' completed at %d.", key, currSecond));
+        private void doSynchronizedThing() {
+            Integer i = map.get(key);
+            System.out.println("i = " + i);
+            map.put(key, i + 1);
+        }
+
+        private void sleep() {
+            try {
+                Thread.sleep(20);
+            } catch (InterruptedException e) {
+                // ignored
             }
         }
     }

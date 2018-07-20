@@ -79,7 +79,7 @@ public class SimpleCache {
      * @param key   对象key
      * @param value 对象值
      */
-    public void put(String key, Serializable value) {
+    public void put(String key, Object value) {
         Element element = new Element(value);
         this.cacheAdapter.put(key, element, false);
     }
@@ -90,7 +90,7 @@ public class SimpleCache {
      * @param key   对象key
      * @param value 对象值
      */
-    public void put(String key, Serializable value, boolean forever) {
+    public void put(String key, Object value, boolean forever) {
         Element element = new Element(value);
         this.cacheAdapter.put(key, element, forever);
     }
@@ -102,7 +102,7 @@ public class SimpleCache {
      * @param value      对象值
      * @param timeToLive 本条缓存的保存时长（秒）
      */
-    public void put(String key, Serializable value, int timeToLive) {
+    public void put(String key, Object value, int timeToLive) {
         Element element = new Element(value);
         this.cacheAdapter.put(key, element, timeToLive);
     }
@@ -123,11 +123,10 @@ public class SimpleCache {
      *
      * @return 对象值
      */
-    public <T extends Serializable> T get(String key) {
-        Serializable value = this.cacheAdapter.get(key);
+    public <T extends Object> T get(String key) {
+        Object value = this.cacheAdapter.get(key);
 
         if (value == null) {
-            LOG.info("Cache missing: {}", key);
             return null;
         }
 
@@ -141,8 +140,8 @@ public class SimpleCache {
         return (T) value;
     }
 
-    public <T extends Serializable> T get(String key, Provider<T> provider) {
-        Serializable value = this.cacheAdapter.get(key);
+    public <T extends Object> T get(String key, Provider<T> provider) {
+        Object value = this.cacheAdapter.get(key);
 
         if (value == null) {
             value = provider.provide();
@@ -159,8 +158,8 @@ public class SimpleCache {
         return (T) value;
     }
 
-    public <T extends Serializable> T get(String key, Provider<T> provider, int cacheTimeoutSeconds) {
-        Serializable value = this.cacheAdapter.get(key);
+    public <T extends Object> T get(String key, Provider<T> provider, int cacheTimeoutSeconds) {
+        Object value = this.cacheAdapter.get(key);
 
         if (value == null) {
             value = provider.provide();
@@ -215,8 +214,8 @@ public class SimpleCache {
      *
      * @throws SimpleCacheException 如果缓存中的元素类型不是 Element
      */
-    public <E extends Serializable> Element<E> getElement(String key) throws SimpleCacheException {
-        Serializable value = this.cacheAdapter.get(key);
+    public <E extends Object> Element<E> getElement(String key) throws SimpleCacheException {
+        Object value = this.cacheAdapter.get(key);
 
         if (value == null) {
             return null;

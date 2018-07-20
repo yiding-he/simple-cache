@@ -98,13 +98,13 @@ public class MemcachedAdapter implements CacheAdapter {
     }
 
     @Override
-    public void put(String key, Serializable value, boolean forever) {
+    public void put(String key, Object value, boolean forever) {
         int expireSeconds = forever ? Integer.MAX_VALUE : configuration.getDefaultCacheExpireSeconds();
         put(key, value, expireSeconds);
     }
 
     @Override
-    public void put(String key, Serializable value, int timeToLiveSeconds) {
+    public void put(String key, Object value, int timeToLiveSeconds) {
         putDirectly((key), value, timeToLiveSeconds);
     }
 
@@ -127,7 +127,7 @@ public class MemcachedAdapter implements CacheAdapter {
      * @param value         要缓存的对象
      * @param expireSeconds 缓存超时秒数
      */
-    private void putDirectly(String key, Serializable value, int expireSeconds) {
+    private void putDirectly(String key, Object value, int expireSeconds) {
         this.client.beginWithNamespace(configuration.getNamespace());
         try {
             this.client.set(key, expireSeconds, value);
@@ -148,7 +148,7 @@ public class MemcachedAdapter implements CacheAdapter {
     }
 
     @Override
-    public boolean compareAndSet(String key, Serializable findValue, final Serializable setValue) {
+    public boolean compareAndSet(String key, Object findValue, final Object setValue) {
         this.client.beginWithNamespace(configuration.getNamespace());
 
         try {
