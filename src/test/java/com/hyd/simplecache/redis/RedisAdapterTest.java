@@ -3,13 +3,16 @@ package com.hyd.simplecache.redis;
 import com.hyd.simplecache.RedisConfiguration;
 import com.hyd.simplecache.bean.User;
 import org.junit.Test;
+import redis.clients.jedis.JedisShardInfo;
+
+import java.util.Arrays;
 
 public class RedisAdapterTest {
 
     private RedisAdapter getAdapter() {
-        RedisConfiguration c = new RedisConfiguration();
-        c.setServer("127.0.0.1");
-        c.setPort(6379);
+        RedisConfiguration c = new RedisConfiguration(Arrays.asList(
+                new JedisShardInfo("127.0.0.1", 6379)
+        ));
         c.setTimeToLiveSeconds(60);
 
         return new RedisAdapter(c);

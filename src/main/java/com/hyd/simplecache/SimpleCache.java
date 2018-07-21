@@ -1,9 +1,10 @@
 package com.hyd.simplecache;
 
+import com.hyd.simplecache.interceptor.CacheDeleteInterceptor;
+import com.hyd.simplecache.interceptor.CacheGetInterceptor;
+import com.hyd.simplecache.interceptor.CachePutInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.Serializable;
 
 /**
  * <p>SimpleCache 的主要使用类。</p>
@@ -26,6 +27,12 @@ public class SimpleCache {
 
     private CacheAdapter cacheAdapter;
 
+    private CachePutInterceptor cachePutInterceptor;
+
+    private CacheGetInterceptor cacheGetInterceptor;
+
+    private CacheDeleteInterceptor deleteInterceptor;
+
     /**
      * 构造方法
      *
@@ -39,6 +46,30 @@ public class SimpleCache {
         cacheAdapter = CacheAdapterFactory.createCacheAdapter(configuration);
     }
 
+    public CachePutInterceptor getCachePutInterceptor() {
+        return cachePutInterceptor;
+    }
+
+    public void setCachePutInterceptor(CachePutInterceptor cachePutInterceptor) {
+        this.cachePutInterceptor = cachePutInterceptor;
+    }
+
+    public CacheGetInterceptor getCacheGetInterceptor() {
+        return cacheGetInterceptor;
+    }
+
+    public void setCacheGetInterceptor(CacheGetInterceptor cacheGetInterceptor) {
+        this.cacheGetInterceptor = cacheGetInterceptor;
+    }
+
+    public CacheDeleteInterceptor getDeleteInterceptor() {
+        return deleteInterceptor;
+    }
+
+    public void setDeleteInterceptor(CacheDeleteInterceptor deleteInterceptor) {
+        this.deleteInterceptor = deleteInterceptor;
+    }
+
     /**
      * 获取当前缓存的配置
      *
@@ -48,15 +79,31 @@ public class SimpleCache {
         return cacheAdapter.getConfiguration();
     }
 
-    /**
-     * 保存 Element 对象到缓存，使用缺省的缓存超时时间
-     *
-     * @param key     键
-     * @param element 要缓存的元素
-     */
-    public void putElement(String key, Element element) {
-        this.cacheAdapter.put(key, element, false);
+    ////////////////////////////////////////////////////////////
+
+    private boolean canPut(String key, Element element) {
+        return this.cachePutInterceptor == null || this.cachePutInterceptor.cachePut(key, element.getValue());
     }
+
+    private void putElementDefault(String key, Element element) {
+        if (canPut(key, element)) {
+            this.cacheAdapter.put(key, element, false);
+        }
+    }
+
+    private void putElementWithTtl(String key, Element element, int ttl) {
+        if (canPut(key, element)) {
+            this.cacheAdapter.put(key, element, ttl);
+        }
+    }
+
+    private void putElementForever(String key, Element element) {
+        if (canPut(key, element)) {
+            this.cacheAdapter.put(key, element, true);
+        }
+    }
+
+    ////////////////////////////////////////////////////////////
 
     /**
      * 保存 Element 对象到缓存，并指定超时时间或永久保存
@@ -65,11 +112,11 @@ public class SimpleCache {
      * @param element           要缓存的元素
      * @param timeToLiveSeconds 缓存时间，0 或负数表示永久保存
      */
-    public void putElement(String key, Element element, int timeToLiveSeconds) {
+    void putElement(String key, Element element, int timeToLiveSeconds) {
         if (timeToLiveSeconds > 0) {
-            this.cacheAdapter.put(key, element, timeToLiveSeconds);
+            this.putElementWithTtl(key, element, timeToLiveSeconds);
         } else {
-            this.cacheAdapter.put(key, element, true);
+            this.putElementForever(key, element);
         }
     }
 
@@ -80,8 +127,7 @@ public class SimpleCache {
      * @param value 对象值
      */
     public void put(String key, Object value) {
-        Element element = new Element(value);
-        this.cacheAdapter.put(key, element, false);
+        this.put(key, value, false);
     }
 
     /**
@@ -92,7 +138,11 @@ public class SimpleCache {
      */
     public void put(String key, Object value, boolean forever) {
         Element element = new Element(value);
-        this.cacheAdapter.put(key, element, forever);
+        if (forever) {
+            this.putElementForever(key, element);
+        } else {
+            this.putElementDefault(key, element);
+        }
     }
 
     /**
@@ -104,7 +154,7 @@ public class SimpleCache {
      */
     public void put(String key, Object value, int timeToLive) {
         Element element = new Element(value);
-        this.cacheAdapter.put(key, element, timeToLive);
+        this.putElementWithTtl(key, element, timeToLive);
     }
 
     /**
@@ -116,6 +166,15 @@ public class SimpleCache {
         this.cacheAdapter.touch(key);
     }
 
+    private <T> T getOrNothing(String key, T value) {
+        return (this.cacheGetInterceptor == null || this.cacheGetInterceptor.cacheGet(key, value)) ? value : null;
+    }
+
+    private <T> Element<T> getOrNothing(String key, Element<T> element) {
+        T value = element.getValue();
+        return (this.cacheGetInterceptor == null || this.cacheGetInterceptor.cacheGet(key, value)) ? element : null;
+    }
+
     /**
      * 从缓存中获取对象
      *
@@ -123,7 +182,7 @@ public class SimpleCache {
      *
      * @return 对象值
      */
-    public <T extends Object> T get(String key) {
+    public <T> T get(String key) {
         Object value = this.cacheAdapter.get(key);
 
         if (value == null) {
@@ -133,14 +192,12 @@ public class SimpleCache {
         // 剥去包装
         if (value instanceof Element) {
             value = ((Element) value).getValue();
-        } else {
-            LOG.debug("Cache value of '" + key + "' is not an Element: " + value.getClass());
         }
 
-        return (T) value;
+        return getOrNothing(key, (T) value);
     }
 
-    public <T extends Object> T get(String key, Provider<T> provider) {
+    public <T> T get(String key, Provider<T> provider) {
         Object value = this.cacheAdapter.get(key);
 
         if (value == null) {
@@ -155,10 +212,10 @@ public class SimpleCache {
             value = ((Element) value).getValue();
         }
 
-        return (T) value;
+        return getOrNothing(key, (T) value);
     }
 
-    public <T extends Object> T get(String key, Provider<T> provider, int cacheTimeoutSeconds) {
+    public <T> T get(String key, Provider<T> provider, int cacheTimeoutSeconds) {
         Object value = this.cacheAdapter.get(key);
 
         if (value == null) {
@@ -177,7 +234,7 @@ public class SimpleCache {
             value = ((Element) value).getValue();
         }
 
-        return (T) value;
+        return getOrNothing(key, (T) value);
     }
 
     /**
@@ -190,8 +247,8 @@ public class SimpleCache {
      * @return 对象值
      */
     @SuppressWarnings("unchecked")
-    public <T extends Serializable> T get(String key, Class<T> type) {
-        Serializable value = get(key);
+    public <T> T get(String key, Class<T> type) {
+        T value = get(key);
 
         if (value == null) {
             return null;
@@ -202,7 +259,7 @@ public class SimpleCache {
                     + value.getClass() + " cannot be cast to " + type.getClass());
         }
 
-        return (T) value;
+        return value;
     }
 
     /**
@@ -214,7 +271,7 @@ public class SimpleCache {
      *
      * @throws SimpleCacheException 如果缓存中的元素类型不是 Element
      */
-    public <E extends Object> Element<E> getElement(String key) throws SimpleCacheException {
+    <E> Element<E> getElement(String key) throws SimpleCacheException {
         Object value = this.cacheAdapter.get(key);
 
         if (value == null) {
@@ -222,7 +279,8 @@ public class SimpleCache {
         }
 
         if (value instanceof Element) {
-            return (Element<E>) value;
+            Element<E> element = (Element<E>) value;
+            return getOrNothing(key, element);
         } else {
             throw new SimpleCacheException(
                     "Cache value of \"" + key + "\" is not an Element (" + value.getClass() + ")");
@@ -235,7 +293,9 @@ public class SimpleCache {
      * @param key 要删除的 key
      */
     public void delete(String key) {
-        this.cacheAdapter.delete(key);
+        if (deleteInterceptor == null || deleteInterceptor.cacheDelete(key)) {
+            this.cacheAdapter.delete(key);
+        }
     }
 
     /**
