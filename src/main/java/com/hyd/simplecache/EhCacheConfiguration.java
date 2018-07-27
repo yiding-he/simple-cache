@@ -1,5 +1,9 @@
 package com.hyd.simplecache;
 
+import org.ehcache.config.Configuration;
+import org.ehcache.config.builders.CacheConfigurationBuilder;
+import org.ehcache.core.config.DefaultConfiguration;
+
 /**
  * (描述)
  *
@@ -9,15 +13,13 @@ public class EhCacheConfiguration implements CacheConfiguration {
 
     public static final int DEFAULT_MAX_ENTRIES_LOCAL_HEAP = 1000;
 
-    private net.sf.ehcache.config.CacheConfiguration configuration = new net.sf.ehcache.config.CacheConfiguration();
-
     public EhCacheConfiguration() {
         this.setName("ehcache" + this.hashCode());
         this.setMaxEntriesLocalHeap(DEFAULT_MAX_ENTRIES_LOCAL_HEAP);
     }
 
-    public net.sf.ehcache.config.CacheConfiguration getConfiguration() {
-        return configuration;
+    public Configuration getConfiguration() {
+        return CacheConfigurationBuilder;
     }
 
     public void setCacheLoaderTimeoutMillis(long value) {

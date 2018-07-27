@@ -3,9 +3,9 @@ package com.hyd.simplecache.ehcache;
 import com.hyd.simplecache.CacheAdapter;
 import com.hyd.simplecache.CacheConfiguration;
 import com.hyd.simplecache.EhCacheConfiguration;
-import net.sf.ehcache.Cache;
-import net.sf.ehcache.CacheManager;
-import net.sf.ehcache.Element;
+import org.ehcache.Cache;
+import org.ehcache.CacheManager;
+import org.ehcache.core.EhcacheManager;
 
 import java.io.Serializable;
 import java.util.Iterator;
@@ -32,7 +32,7 @@ public class EhCacheAdapter implements CacheAdapter {
     }
 
     private void initCache(EhCacheConfiguration configuration) {
-        CacheManager cacheManager = CacheManager.getInstance();
+        CacheManager cacheManager = new EhcacheManager(configuration.getConfiguration());
         String cacheName = configuration.getName();
 
         // 如果 CacheManager 已经有了同名 Cache，则使用已有的 Cache
