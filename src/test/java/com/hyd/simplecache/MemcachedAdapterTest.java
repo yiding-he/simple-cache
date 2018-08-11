@@ -12,7 +12,7 @@ public class MemcachedAdapterTest {
     @Test
     public void testConnectionPool() throws Exception {
         MemcachedConfiguration config =
-                new MemcachedConfiguration("woplus.content", "192.168.39.243:10000/2");
+                new MemcachedConfiguration("woplus.content", "localhost:11211/1");
 
         config.setDefaultCacheExpireSeconds(30);
 
