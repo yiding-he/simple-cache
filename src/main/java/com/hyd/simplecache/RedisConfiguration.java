@@ -2,6 +2,7 @@ package com.hyd.simplecache;
 
 import redis.clients.jedis.JedisShardInfo;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -17,6 +18,15 @@ public class RedisConfiguration implements CacheConfiguration {
     private int timeToIdleSeconds;
 
     private int timeToLiveSeconds;
+
+    public RedisConfiguration() {
+    }
+
+    public RedisConfiguration(String host, int port) {
+        this(Collections.singletonList(
+                new JedisShardInfo(host, port)
+        ));
+    }
 
     public RedisConfiguration(List<JedisShardInfo> shardInfoList) {
         this.shardInfoList = shardInfoList;

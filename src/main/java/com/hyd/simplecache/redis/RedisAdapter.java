@@ -141,13 +141,6 @@ public class RedisAdapter implements CacheAdapter {
     }
 
     @Override
-    public boolean compareAndSet(
-            final String key, final Object findValue, final Object setValue
-    ) throws UnsupportedOperationException {
-        throw new UnsupportedOperationException("cas operation is not supported by redis.");
-    }
-
-    @Override
     public void dispose() {
         this.shardedJedisPool.close();
     }

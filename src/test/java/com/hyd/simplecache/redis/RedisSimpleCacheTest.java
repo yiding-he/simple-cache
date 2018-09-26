@@ -19,9 +19,7 @@ public class RedisSimpleCacheTest {
 
     @Test
     public void testGetSet() throws Exception {
-        RedisConfiguration c = new RedisConfiguration(Collections.singletonList(
-                new JedisShardInfo("127.0.0.1", 6379)
-        ));
+        RedisConfiguration c = new RedisConfiguration("127.0.0.1", 6379);
         c.setTimeToLiveSeconds(60);
 
         SimpleCache cache = new SimpleCache(c);

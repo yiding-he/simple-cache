@@ -89,13 +89,6 @@ public class EhCacheAdapter implements CacheAdapter {
     }
 
     @Override
-    public boolean compareAndSet(String key, Object findValue, Object setValue) {
-        Element oldElement = new Element(key, findValue);
-        Element newElement = new Element(key, setValue);
-        return this.cache.replace(oldElement, newElement);
-    }
-
-    @Override
     public void dispose() {
         CacheManager.getInstance().removeCache(this.cache.getName());
     }

@@ -1,5 +1,6 @@
 package com.hyd.simplecache;
 
+import com.hyd.simplecache.caffeine.CaffeineAdapter;
 import com.hyd.simplecache.ehcache.EhCacheAdapter;
 import com.hyd.simplecache.memcached.MemcachedAdapter;
 import com.hyd.simplecache.redis.RedisAdapter;
@@ -25,6 +26,7 @@ public class CacheAdapterFactory {
         CREATOR_MAP.put(EhCacheConfiguration.class, new EhCacheCreator());
         CREATOR_MAP.put(MemcachedConfiguration.class, new MemcachedCreator());
         CREATOR_MAP.put(RedisConfiguration.class, new RedisCreator());
+        CREATOR_MAP.put(CaffeineConfiguration.class, new CaffeineCreator());
     }
 
     /**
@@ -84,6 +86,14 @@ public class CacheAdapterFactory {
         @Override
         public CacheAdapter create(RedisConfiguration configuration) {
             return new RedisAdapter(configuration);
+        }
+    }
+
+    private static class CaffeineCreator implements CacheAdapterCreator<CaffeineConfiguration> {
+
+        @Override
+        public CacheAdapter create(CaffeineConfiguration configuration) {
+            return new CaffeineAdapter(configuration);
         }
     }
 }

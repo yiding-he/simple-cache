@@ -1,8 +1,6 @@
 package com.hyd.simplecache.memcached;
 
 import com.hyd.simplecache.*;
-import net.rubyeye.xmemcached.CASOperation;
-import net.rubyeye.xmemcached.GetsResponse;
 import net.rubyeye.xmemcached.MemcachedClient;
 import net.rubyeye.xmemcached.XMemcachedClientBuilder;
 import org.slf4j.Logger;
@@ -144,38 +142,6 @@ public class MemcachedAdapter implements CacheAdapter {
             this.client.invalidateNamespace(configuration.getNamespace());
         } catch (Exception e) {
             throw new SimpleCacheException(e);
-        }
-    }
-
-    @Override
-    public boolean compareAndSet(String key, Object findValue, final Object setValue) {
-        this.client.beginWithNamespace(configuration.getNamespace());
-
-        try {
-            final GetsResponse<Object> gets = this.client.gets((key));
-
-            if (!gets.getValue().equals(findValue)) {
-                return false;
-            }
-
-            this.client.cas(key, new CASOperation<Object>() {
-
-                @Override
-                public int getMaxTries() {
-                    return 1;
-                }
-
-                @Override
-                public Object getNewValue(long currentCAS, Object currentValue) {
-                    return setValue;
-                }
-            });
-
-            return true;
-        } catch (Exception e) {
-            return false;
-        } finally {
-            this.client.endWithNamespace();
         }
     }
 
