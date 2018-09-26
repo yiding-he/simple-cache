@@ -6,6 +6,7 @@ import com.hyd.simplecache.EhCacheConfiguration;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
+import net.sf.ehcache.Status;
 
 import java.util.Iterator;
 
@@ -27,10 +28,10 @@ public class EhCacheAdapter implements CacheAdapter {
      */
     public EhCacheAdapter(EhCacheConfiguration configuration) {
         this.configuration = configuration;
-        initCache(configuration);
+        initCache();
     }
 
-    private void initCache(EhCacheConfiguration configuration) {
+    private void initCache() {
         CacheManager cacheManager = CacheManager.getInstance();
         String cacheName = configuration.getName();
 
@@ -48,19 +49,33 @@ public class EhCacheAdapter implements CacheAdapter {
         return this.configuration;
     }
 
+    private void checkCacheStatus() {
+        if (this.cache.getStatus() != Status.STATUS_ALIVE) {
+            synchronized (this) {
+                if (this.cache.getStatus() != Status.STATUS_ALIVE) {
+                    initCache();
+                }
+            }
+        }
+    }
+
     @Override
     public void touch(String key) {
+        checkCacheStatus();
         this.cache.get(key);    // 触发 timeToIdle
     }
 
     @Override
     public Object get(String key) {
+        checkCacheStatus();
         Element element = this.cache.get(key);
         return element == null ? null : (Object) element.getObjectValue();
     }
 
     @Override
     public void put(String key, Object value, boolean forever) {
+        checkCacheStatus();
+
         Element element = new Element(key, value);
 
         if (forever) {
@@ -72,6 +87,8 @@ public class EhCacheAdapter implements CacheAdapter {
 
     @Override
     public void put(String key, Object value, int timeToLiveSeconds) {
+        checkCacheStatus();
+
         Element element = new Element(key, value);
         element.setTimeToLive(timeToLiveSeconds);
 
@@ -80,11 +97,13 @@ public class EhCacheAdapter implements CacheAdapter {
 
     @Override
     public void delete(String key) {
+        checkCacheStatus();
         this.cache.remove(key);
     }
 
     @Override
     public void clear() {
+        checkCacheStatus();
         this.cache.removeAll();
     }
 
@@ -96,11 +115,13 @@ public class EhCacheAdapter implements CacheAdapter {
     @SuppressWarnings("unchecked")
     @Override
     public Iterator<String> keys() {
+        checkCacheStatus();
         return this.cache.getKeys().iterator();
     }
 
     @Override
     public boolean keyExists(String key) {
+        checkCacheStatus();
         return this.cache.isKeyInCache(key);
     }
 }
