@@ -81,6 +81,19 @@ public class SimpleCache {
 
     ////////////////////////////////////////////////////////////
 
+    // 当从缓存中取到的对象类型不正确时，是否自动删除该缓存并填入正确的值
+    private boolean refillOnTypeError = true;
+
+    public boolean isRefillOnTypeError() {
+        return refillOnTypeError;
+    }
+
+    public void setRefillOnTypeError(boolean refillOnTypeError) {
+        this.refillOnTypeError = refillOnTypeError;
+    }
+
+    ////////////////////////////////////////////////////////////
+
     private boolean canPut(String key, Element element) {
         return this.cachePutInterceptor == null || this.cachePutInterceptor.cachePut(key, element.getValue());
     }
@@ -175,6 +188,22 @@ public class SimpleCache {
         return (this.cacheGetInterceptor == null || this.cacheGetInterceptor.cacheGet(key, value)) ? element : null;
     }
 
+    private <T> T getOrNothingTypeSafe(String key, Provider<T> provider, Object value) {
+        try {
+            return getOrNothing(key, (T) value);
+        } catch (ClassCastException e) {
+            if (refillOnTypeError) {
+                value = provider.provide();
+                if (value != null) {
+                    put(key, value);
+                }
+                return getOrNothing(key, (T) value);
+            } else {
+                throw e;
+            }
+        }
+    }
+
     /**
      * 从缓存中获取对象
      *
@@ -212,7 +241,7 @@ public class SimpleCache {
             value = ((Element) value).getValue();
         }
 
-        return getOrNothing(key, (T) value);
+        return getOrNothingTypeSafe(key, provider, value);
     }
 
     public <T> T get(String key, Provider<T> provider, int cacheTimeoutSeconds) {
@@ -234,7 +263,7 @@ public class SimpleCache {
             value = ((Element) value).getValue();
         }
 
-        return getOrNothing(key, (T) value);
+        return getOrNothingTypeSafe(key, provider, value);
     }
 
     /**
