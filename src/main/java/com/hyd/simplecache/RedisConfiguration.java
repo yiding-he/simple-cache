@@ -15,16 +15,32 @@ public class RedisConfiguration implements CacheConfiguration {
 
     private List<JedisShardInfo> shardInfoList;
 
-    private int timeToIdleSeconds;
+    private int timeToIdleSeconds = 3600;
 
-    private int timeToLiveSeconds;
+    private int timeToLiveSeconds = 3600;
+
+    private static JedisShardInfo createJedisShardInfo(String host, int port) {
+        return new JedisShardInfo(host, port);
+    }
+
+    private static JedisShardInfo createJedisShardInfo(String host, int port, String pass) {
+        JedisShardInfo jedisShardInfo = new JedisShardInfo(host, port);
+        jedisShardInfo.setPassword(pass);
+        return jedisShardInfo;
+    }
 
     public RedisConfiguration() {
     }
 
     public RedisConfiguration(String host, int port) {
         this(Collections.singletonList(
-                new JedisShardInfo(host, port)
+                createJedisShardInfo(host, port)
+        ));
+    }
+
+    public RedisConfiguration(String host, int port, String pass) {
+        this(Collections.singletonList(
+                createJedisShardInfo(host, port, pass)
         ));
     }
 
