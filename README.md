@@ -5,8 +5,11 @@ simple-cache 是一个为不同种类的缓存提供统一 API 的类库。其�
 simple-cache 支持以下底层实现：
 
 - 本地缓存：
+  - Cache2k
   - caffeine
   - ehcache
+  - JCS
+  - Guava
 - 远程缓存：
   - memcached
   - redis
