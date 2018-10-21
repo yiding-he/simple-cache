@@ -1,4 +1,4 @@
-## DEPRECATED
+## DEPRECATED(DEPRECATED)
 
 *本项目已经停止开发，因为该项目开始开发的时候 Spring 尚未流行起来，作者现在更习惯用 Spring Cache*
 
