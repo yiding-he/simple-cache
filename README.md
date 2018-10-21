@@ -2,6 +2,10 @@
 
 *本项目已经停止开发，因为该项目开始开发的时候 Spring 尚未流行起来，作者现在更习惯用 Spring Cache*
 
+## No, not deprecated
+
+*用了一阵子发现 Spring Cache 仍然存在缺陷（比如内部方法无法采用 @Cached 注解），所以 simple-cache 还得继续用。*
+
 # simple-cache
 
 simple-cache 是一个为不同种类的缓存提供统一接口的类库。其目的是方便项目在本地缓存和远程缓存之间切换。
