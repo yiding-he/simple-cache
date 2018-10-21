@@ -4,14 +4,9 @@ import com.hyd.simplecache.RedisConfiguration;
 import com.hyd.simplecache.SimpleCache;
 import com.hyd.simplecache.bean.User;
 import com.hyd.simplecache.utils.JsonUtils;
+import org.junit.Assert;
 import org.junit.Test;
 
-/**
- * (description)
- * created at 2015/3/16
- *
- * @author Yiding
- */
 public class RedisSimpleCacheTest {
 
     @Test
@@ -22,9 +17,15 @@ public class RedisSimpleCacheTest {
         c.setTimeToLiveSeconds(60);
 
         SimpleCache cache = new SimpleCache(c);
-        User user = cache.get("user");
 
-        System.out.println(JsonUtils.toJson(user));
+        User user = new User();
+        user.setUsername("user1");
+        user.setPassword("pass1");
+        cache.put("user", user);
+
+        User cachedUser = cache.get("user");
+        Assert.assertEquals(user.getUsername(), cachedUser.getUsername());
+        Assert.assertEquals(user.getPassword(), cachedUser.getPassword());
     }
 
     @Test
@@ -37,7 +38,8 @@ public class RedisSimpleCacheTest {
 
         SimpleCache cache = new SimpleCache(c);
         cache.put("name", "simple-cache");
-        System.out.println(cache.get("name"));
+        String name = cache.get("name");
+        Assert.assertEquals("simple-cache", name);
     }
 
     @Test
@@ -50,6 +52,7 @@ public class RedisSimpleCacheTest {
 
         SimpleCache cache = new SimpleCache(c);
         cache.put("name", "simple-cache");
-        System.out.println(cache.get("name"));
+        String name = cache.get("name");
+        Assert.assertEquals("simple-cache", name);
     }
 }

@@ -1,0 +1,34 @@
+{
+  "groups": [
+    {
+      "sourceType": "com.hyd.simplecache.springboot.SimpleCacheAutoConfiguration",
+      "name": "simple-cache",
+      "type": "com.hyd.simplecache.springboot.SimpleCacheAutoConfiguration"
+    }
+  ],
+  "properties": [
+    {
+      "sourceType": "com.hyd.simplecache.springboot.SimpleCacheAutoConfiguration",
+      "name": "simple-cache.memcached",
+      "type": "java.util.Map<java.lang.String,com.hyd.simplecache.MemcachedConfiguration>"
+    },
+    {
+      "sourceType": "com.hyd.simplecache.springboot.SimpleCacheAutoConfiguration",
+      "name": "simple-cache.redis",
+      "type": "java.util.Map<java.lang.String,com.hyd.simplecache.RedisConfiguration>"
+    }
+  ],
+  "hints": [
+    {
+      "name": "simple-cache.redis.values",
+      "providers": [
+        {
+          "name": "handle-as",
+          "parameters": {
+            "target": "com.hyd.simplecache.RedisConfiguration"
+          }
+        }
+      ]
+    }
+  ]
+}

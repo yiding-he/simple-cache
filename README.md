@@ -7,7 +7,6 @@ simple-cache 支持以下底层实现：
 - 本地缓存：
   - Cache2k
   - caffeine
-  - ehcache
   - JCS
   - Guava
 - 远程缓存：

@@ -1,11 +1,5 @@
 package com.hyd.simplecache;
 
-/**
- * (description)
- * created at 2015/3/16
- *
- * @author Yiding
- */
 public class RedisConfiguration implements CacheConfiguration {
 
     private String server;

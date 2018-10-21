@@ -1,6 +1,5 @@
 package com.hyd.simplecache;
 
-import com.hyd.simplecache.ehcache.EhCacheAdapter;
 import com.hyd.simplecache.memcached.MemcachedAdapter;
 import com.hyd.simplecache.redis.RedisAdapter;
 
@@ -9,8 +8,6 @@ import java.util.Map;
 
 /**
  * 创建 CacheAdapter 对象的工厂类。
- *
- * @author 贺一丁
  */
 public class CacheAdapterFactory {
 
@@ -22,7 +19,6 @@ public class CacheAdapterFactory {
      * {@link CacheAdapterCreator} 类，然后将其加入下面这个 Map 当中
      */
     static {
-        CREATOR_MAP.put(EhCacheConfiguration.class, new EhCacheCreator());
         CREATOR_MAP.put(MemcachedConfiguration.class, new MemcachedCreator());
         CREATOR_MAP.put(RedisConfiguration.class, new RedisCreator());
     }
@@ -55,17 +51,6 @@ public class CacheAdapterFactory {
     private static interface CacheAdapterCreator<T extends CacheConfiguration> {
 
         CacheAdapter create(T configuration);
-    }
-
-    /**
-     * EhCache 缓存创建类
-     */
-    private static class EhCacheCreator implements CacheAdapterCreator<EhCacheConfiguration> {
-
-        @Override
-        public CacheAdapter create(EhCacheConfiguration configuration) {
-            return new EhCacheAdapter(configuration);
-        }
     }
 
     /**
