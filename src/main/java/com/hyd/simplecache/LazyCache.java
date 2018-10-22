@@ -5,8 +5,6 @@ import com.hyd.simplecache.utils.LockFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.Serializable;
-
 /**
  * 预先定义查询方法的缓存。使用时调用其 {@link #get(Object...)} 方法即可，LazyCache 会判断是否有缓存，有
  * 就直接返回缓存，否则调用 {@link #fetch(Object[])} 方法并将结果缓存起来，然后再返回。
@@ -32,7 +30,7 @@ import java.io.Serializable;
  * @author yiding
  */
 @SuppressWarnings({"unchecked"})
-public abstract class LazyCache<T extends Serializable> {
+public abstract class LazyCache<T> {
 
     private static final String SEPERATOR = "//";   // ESC
 
@@ -79,7 +77,7 @@ public abstract class LazyCache<T extends Serializable> {
         T value = null;
 
         synchronized (LockFactory.getLock(cacheKey)) {
-            Element<Serializable> element = this.simpleCache.getElement(cacheKey);
+            Element<T> element = this.simpleCache.getElement(cacheKey);
 
             if (element == null) {
                 try {

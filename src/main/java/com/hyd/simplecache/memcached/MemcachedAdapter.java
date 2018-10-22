@@ -1,18 +1,14 @@
 package com.hyd.simplecache.memcached;
 
 import com.hyd.simplecache.*;
-import net.rubyeye.xmemcached.CASOperation;
-import net.rubyeye.xmemcached.GetsResponse;
 import net.rubyeye.xmemcached.MemcachedClient;
 import net.rubyeye.xmemcached.XMemcachedClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -49,7 +45,7 @@ public class MemcachedAdapter implements CacheAdapter {
     private XMemcachedClientBuilder createBuilder(MemcachedConfiguration configuration) {
         List<WeightedAddress> addresses = configuration.getAddresses();
 
-        List<InetSocketAddress> socketAddresses = new ArrayList<InetSocketAddress>();
+        List<InetSocketAddress> socketAddresses = new ArrayList<>();
         int[] weights = new int[addresses.size()];
 
         for (int i = 0; i < addresses.size(); i++) {
@@ -67,7 +63,7 @@ public class MemcachedAdapter implements CacheAdapter {
     }
 
     @Override
-    public Serializable get(String key) throws SimpleCacheException {
+    public Object get(String key) throws SimpleCacheException {
         this.client.beginWithNamespace(configuration.getNamespace());
 
         try {
@@ -98,13 +94,13 @@ public class MemcachedAdapter implements CacheAdapter {
     }
 
     @Override
-    public void put(String key, Serializable value, boolean forever) {
+    public void put(String key, Object value, boolean forever) {
         int expireSeconds = forever ? Integer.MAX_VALUE : configuration.getDefaultCacheExpireSeconds();
         put(key, value, expireSeconds);
     }
 
     @Override
-    public void put(String key, Serializable value, int timeToLiveSeconds) {
+    public void put(String key, Object value, int timeToLiveSeconds) {
         putDirectly((key), value, timeToLiveSeconds);
     }
 
@@ -127,7 +123,7 @@ public class MemcachedAdapter implements CacheAdapter {
      * @param value         要缓存的对象
      * @param expireSeconds 缓存超时秒数
      */
-    private void putDirectly(String key, Serializable value, int expireSeconds) {
+    private void putDirectly(String key, Object value, int expireSeconds) {
         this.client.beginWithNamespace(configuration.getNamespace());
         try {
             this.client.set(key, expireSeconds, value);
@@ -148,38 +144,6 @@ public class MemcachedAdapter implements CacheAdapter {
     }
 
     @Override
-    public boolean compareAndSet(String key, Serializable findValue, final Serializable setValue) {
-        this.client.beginWithNamespace(configuration.getNamespace());
-
-        try {
-            final GetsResponse<Object> gets = this.client.gets((key));
-
-            if (!gets.getValue().equals(findValue)) {
-                return false;
-            }
-
-            this.client.cas(key, new CASOperation<Object>() {
-
-                @Override
-                public int getMaxTries() {
-                    return 1;
-                }
-
-                @Override
-                public Object getNewValue(long currentCAS, Object currentValue) {
-                    return setValue;
-                }
-            });
-
-            return true;
-        } catch (Exception e) {
-            return false;
-        } finally {
-            this.client.endWithNamespace();
-        }
-    }
-
-    @Override
     public void dispose() {
         try {
             this.client.shutdown();
@@ -187,11 +151,6 @@ public class MemcachedAdapter implements CacheAdapter {
         } catch (IOException e) {
             log.warn("Failed to shutdown memcached client:", e);
         }
-    }
-
-    @Override
-    public Iterator<String> keys() throws UnsupportedOperationException {
-        throw new UnsupportedOperationException("Key iterator is not supported by memcached.");
     }
 
     @Override

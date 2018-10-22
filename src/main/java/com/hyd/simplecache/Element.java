@@ -1,13 +1,9 @@
 package com.hyd.simplecache;
 
-import java.io.Serializable;
-
 /**
  * 对缓存元素的包装
- *
- * @author 贺一丁
  */
-public class Element<E extends Serializable> implements Serializable {
+public class Element<E> {
 
     // DO NOT CHANGE THIS OR YOU MAY GET SERIALIZATION ERROR
     public static final long serialVersionUID = -1239539875870833481L;

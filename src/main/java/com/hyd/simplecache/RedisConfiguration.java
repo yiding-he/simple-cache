@@ -1,16 +1,55 @@
 package com.hyd.simplecache;
 
+import redis.clients.jedis.JedisShardInfo;
+
+import java.util.Collections;
+import java.util.List;
+
+/**
+ * Configurations for redis caching.
+ *
+ * @author Yiding
+ */
 public class RedisConfiguration implements CacheConfiguration {
 
-    private String server;
+    private List<JedisShardInfo> shardInfoList;
 
-    private int port;
+    private int timeToIdleSeconds = 3600;
 
-    private String password;
+    private int timeToLiveSeconds = 3600;
 
-    private int timeToLiveSeconds;
+    private static JedisShardInfo createJedisShardInfo(String host, int port) {
+        return new JedisShardInfo(host, port);
+    }
 
-    private int timeToIdleSeconds;
+    private static JedisShardInfo createJedisShardInfo(String host, int port, String pass) {
+        JedisShardInfo jedisShardInfo = new JedisShardInfo(host, port);
+        jedisShardInfo.setPassword(pass);
+        return jedisShardInfo;
+    }
+
+    public RedisConfiguration() {
+    }
+
+    public RedisConfiguration(String host, int port) {
+        this(Collections.singletonList(
+                createJedisShardInfo(host, port)
+        ));
+    }
+
+    public RedisConfiguration(String host, int port, String pass) {
+        this(Collections.singletonList(
+                createJedisShardInfo(host, port, pass)
+        ));
+    }
+
+    public RedisConfiguration(List<JedisShardInfo> shardInfoList) {
+        this.shardInfoList = shardInfoList;
+    }
+
+    public List<JedisShardInfo> getShardInfoList() {
+        return shardInfoList;
+    }
 
     public int getTimeToIdleSeconds() {
         return timeToIdleSeconds;
@@ -26,29 +65,5 @@ public class RedisConfiguration implements CacheConfiguration {
 
     public void setTimeToLiveSeconds(int timeToLiveSeconds) {
         this.timeToLiveSeconds = timeToLiveSeconds;
-    }
-
-    public String getServer() {
-        return server;
-    }
-
-    public void setServer(String server) {
-        this.server = server;
-    }
-
-    public int getPort() {
-        return port;
-    }
-
-    public void setPort(int port) {
-        this.port = port;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 }

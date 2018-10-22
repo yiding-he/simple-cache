@@ -6,12 +6,11 @@ import net.rubyeye.xmemcached.MemcachedClient;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * (描述)
- *
- * @author 贺一丁
- */
 public class MemcachedConfiguration implements CacheConfiguration {
+
+    public static final String DEFAULT_NAMESPACE = "__default__";
+
+    public static final String DEFAULT_ADDRESS = "localhost:11211";
 
     private String namespace;
 
@@ -28,6 +27,7 @@ public class MemcachedConfiguration implements CacheConfiguration {
     private List<WeightedAddress> addresses = new ArrayList<WeightedAddress>();
 
     public MemcachedConfiguration() {
+        this(DEFAULT_NAMESPACE, DEFAULT_ADDRESS);
     }
 
     public MemcachedConfiguration(String namespace, String addresses) {

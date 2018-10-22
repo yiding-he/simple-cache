@@ -7,9 +7,7 @@ import org.junit.Test;
 public class RedisAdapterTest {
 
     private RedisAdapter getAdapter() {
-        RedisConfiguration c = new RedisConfiguration();
-        c.setServer("127.0.0.1");
-        c.setPort(6379);
+        RedisConfiguration c = new RedisConfiguration("127.0.0.1", 6379);
         c.setTimeToLiveSeconds(60);
 
         return new RedisAdapter(c);

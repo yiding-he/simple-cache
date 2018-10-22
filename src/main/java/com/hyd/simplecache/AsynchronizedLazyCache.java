@@ -5,7 +5,6 @@ import com.hyd.simplecache.utils.LockFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -19,7 +18,7 @@ import java.util.concurrent.TimeUnit;
  * @author 贺一丁
  */
 @SuppressWarnings({"unchecked"})
-public abstract class AsynchronizedLazyCache<T extends Serializable> extends LazyCache<T> {
+public abstract class AsynchronizedLazyCache<T> extends LazyCache<T> {
 
     public static final int DEFAULT_POOL_SIZE = 10;
 
@@ -209,7 +208,7 @@ public abstract class AsynchronizedLazyCache<T extends Serializable> extends Laz
             RefreshTaskExecutor.addRunningCacheKey(this.cacheKey);
 
             try {
-                Serializable value = cache.fetch(this.parameters);
+                Object value = cache.fetch(this.parameters);
 
                 // 当实现 AsynchronizedLazyCache 时，只要令 fetch()
                 // 方法返回 null，就可以保持缓存中的内容不变。

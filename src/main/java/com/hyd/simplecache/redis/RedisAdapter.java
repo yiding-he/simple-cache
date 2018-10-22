@@ -3,13 +3,10 @@ package com.hyd.simplecache.redis;
 import com.hyd.simplecache.CacheAdapter;
 import com.hyd.simplecache.CacheConfiguration;
 import com.hyd.simplecache.RedisConfiguration;
-import com.hyd.simplecache.SimpleCacheException;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
+import org.nustaq.serialization.FSTConfiguration;
 import redis.clients.jedis.JedisPoolConfig;
-
-import java.io.*;
-import java.util.Iterator;
+import redis.clients.jedis.ShardedJedis;
+import redis.clients.jedis.ShardedJedisPool;
 
 /**
  * created at 2015/3/16
@@ -18,35 +15,28 @@ import java.util.Iterator;
  */
 public class RedisAdapter implements CacheAdapter {
 
+    private static FSTConfiguration FST;
+
+    static {
+        FST = FSTConfiguration.createDefaultConfiguration();
+        FST.setForceSerializable(true);
+    }
+
     private RedisConfiguration configuration;
 
-    private JedisPool jedisPool;
+    private final ShardedJedisPool shardedJedisPool;
 
     public RedisAdapter(RedisConfiguration configuration) {
         this.configuration = configuration;
-        this.jedisPool = new JedisPool(new JedisPoolConfig(),
-                configuration.getServer(), configuration.getPort(), 1000, configuration.getPassword());
+        shardedJedisPool = new ShardedJedisPool(new JedisPoolConfig(), configuration.getShardInfoList());
     }
 
-    public static Serializable deserialize(byte[] bytes) {
-        try {
-            ByteArrayInputStream in = new ByteArrayInputStream(bytes);
-            return (Serializable) new ObjectInputStream(in).readObject();
-        } catch (java.io.InvalidClassException e) {
-            return null;
-        } catch (Exception e) {
-            throw new SimpleCacheException(e);
-        }
+    private static Object deserialize(byte[] bytes) {
+        return FST.asObject(bytes);
     }
 
-    public static byte[] serialize(Serializable serializable) {
-        try {
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            new ObjectOutputStream(out).writeObject(serializable);
-            return out.toByteArray();
-        } catch (IOException e) {
-            throw new SimpleCacheException(e);
-        }
+    private static byte[] serialize(Object o) {
+        return FST.asByteArray(o);
     }
 
     @Override
@@ -55,84 +45,68 @@ public class RedisAdapter implements CacheAdapter {
     }
 
     private <T> T withJedis(JedisExecutor<T> executor) {
-        Jedis jedis = this.jedisPool.getResource();
-        try {
+        try (ShardedJedis jedis = shardedJedisPool.getResource()) {
             return executor.execute(jedis);
-        } finally {
-            this.jedisPool.returnResource(jedis);
         }
     }
 
     ////////////////////////////////////////////////////////////////
 
     @Override
-    public Serializable get(final String key) {
-        return withJedis(new JedisExecutor<Serializable>() {
+    public Object get(final String key) {
+        return withJedis(jedis -> {
+            if (configuration.getTimeToIdleSeconds() > 0) {
+                jedis.expire(key, configuration.getTimeToIdleSeconds());
+            }
 
-            @Override
-            public Serializable execute(Jedis jedis) {
-                if (configuration.getTimeToIdleSeconds() > 0) {
-                    jedis.expire(key, configuration.getTimeToIdleSeconds());
-                }
-                return deserialize(jedis.get(key.getBytes()));
+            byte[] bytes = jedis.get(key.getBytes());
+
+            if (bytes == null) {
+                return null;
+            } else {
+                return deserialize(bytes);
             }
         });
     }
 
     @Override
     public void touch(final String key) {
-        withJedis(new JedisExecutor<Void>() {
-
-            @Override
-            public Void execute(Jedis jedis) {
-                if (configuration.getTimeToIdleSeconds() > 0) {
-                    jedis.expire(key, configuration.getTimeToIdleSeconds());
-                }
-                return null;
+        withJedis((JedisExecutor<Void>) jedis -> {
+            if (configuration.getTimeToIdleSeconds() > 0) {
+                jedis.expire(key, configuration.getTimeToIdleSeconds());
             }
+            return null;
         });
     }
 
     ////////////////////////////////////////////////////////////////
 
     @Override
-    public void put(final String key, final Serializable value, final boolean forever) {
-        withJedis(new JedisExecutor<Void>() {
-
-            @Override
-            public Void execute(Jedis jedis) {
-                if (forever) {
-                    jedis.set(key.getBytes(), serialize(value));
-                } else {
-                    int ttl = configuration.getTimeToLiveSeconds();
-                    jedis.setex(key.getBytes(), ttl, serialize(value));
-                }
-                return null;
+    public void put(final String key, final Object value, final boolean forever) {
+        withJedis((JedisExecutor<Void>) jedis -> {
+            if (forever) {
+                jedis.set(key.getBytes(), serialize(value));
+            } else {
+                int ttl = configuration.getTimeToLiveSeconds();
+                jedis.setex(key.getBytes(), ttl, serialize(value));
             }
+            return null;
         });
     }
 
     @Override
-    public void put(final String key, final Serializable value, final int timeToLiveSeconds) {
-        withJedis(new JedisExecutor<Void>() {
-
-            @Override
-            public Void execute(Jedis jedis) {
-                jedis.setex(key.getBytes(), timeToLiveSeconds, serialize(value));
-                return null;
-            }
+    public void put(final String key, final Object value, final int timeToLiveSeconds) {
+        withJedis((JedisExecutor<Void>) jedis -> {
+            jedis.setex(key.getBytes(), timeToLiveSeconds, serialize(value));
+            return null;
         });
     }
 
     @Override
     public void delete(final String key) {
-        withJedis(new JedisExecutor<Void>() {
-
-            @Override
-            public Void execute(Jedis jedis) {
-                jedis.del(key.getBytes());
-                return null;
-            }
+        withJedis((JedisExecutor<Void>) jedis -> {
+            jedis.del(key.getBytes());
+            return null;
         });
     }
 
@@ -142,36 +116,17 @@ public class RedisAdapter implements CacheAdapter {
     }
 
     @Override
-    public boolean compareAndSet(
-            final String key, final Serializable findValue, final Serializable setValue
-    ) throws UnsupportedOperationException {
-        throw new UnsupportedOperationException("cas operation is not supported by redis.");
-    }
-
-    @Override
     public void dispose() {
-        this.jedisPool.destroy();
-        this.jedisPool = null;
-    }
-
-    @Override
-    public Iterator<String> keys() throws UnsupportedOperationException {
-        throw new UnsupportedOperationException("iteration of keys is not supported by redis.");
+        this.shardedJedisPool.close();
     }
 
     @Override
     public boolean keyExists(final String key) {
-        return withJedis(new JedisExecutor<Boolean>() {
-
-            @Override
-            public Boolean execute(Jedis jedis) {
-                return jedis.exists(key.getBytes());
-            }
-        });
+        return withJedis(jedis -> jedis.exists(key.getBytes()));
     }
 
     private interface JedisExecutor<T> {
 
-        T execute(Jedis jedis);
+        T execute(ShardedJedis jedis);
     }
 }

@@ -1,13 +1,11 @@
 package com.hyd.simplecache.bean;
 
-import java.io.Serializable;
-
 /**
  * [description]
  *
  * @author yiding.he
  */
-public class User implements Serializable {
+public class User {
 
     private String username;
 

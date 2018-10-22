@@ -3,7 +3,6 @@ package com.hyd.simplecache.redis;
 import com.hyd.simplecache.RedisConfiguration;
 import com.hyd.simplecache.SimpleCache;
 import com.hyd.simplecache.bean.User;
-import com.hyd.simplecache.utils.JsonUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -11,9 +10,7 @@ public class RedisSimpleCacheTest {
 
     @Test
     public void testGetSet() throws Exception {
-        RedisConfiguration c = new RedisConfiguration();
-        c.setServer("127.0.0.1");
-        c.setPort(6379);
+        RedisConfiguration c = new RedisConfiguration("127.0.0.1", 6379);
         c.setTimeToLiveSeconds(60);
 
         SimpleCache cache = new SimpleCache(c);
@@ -30,10 +27,7 @@ public class RedisSimpleCacheTest {
 
     @Test
     public void testAuth() throws Exception {
-        RedisConfiguration c = new RedisConfiguration();
-        c.setServer("127.0.0.1");
-        c.setPort(6379);
-        c.setPassword("pass123");
+        RedisConfiguration c = new RedisConfiguration("127.0.0.1", 6379, "pass123");
         c.setTimeToLiveSeconds(60);
 
         SimpleCache cache = new SimpleCache(c);
@@ -44,10 +38,7 @@ public class RedisSimpleCacheTest {
 
     @Test
     public void testAuthFail() throws Exception {
-        RedisConfiguration c = new RedisConfiguration();
-        c.setServer("127.0.0.1");
-        c.setPort(6379);
-        c.setPassword("pass1234");   // wrong pass
+        RedisConfiguration c = new RedisConfiguration("127.0.0.1", 6379, "pass1234");
         c.setTimeToLiveSeconds(60);
 
         SimpleCache cache = new SimpleCache(c);
