@@ -242,6 +242,9 @@ public class SimpleCache {
         this.cacheAdapter.clear();
     }
 
+    /**
+     * 某些缓存客户端可能需要手工关闭
+     */
     public void close() {
         this.cacheAdapter.dispose();
     }

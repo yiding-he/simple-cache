@@ -11,11 +11,6 @@ import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.util.*;
 
-/**
- * (description)
- *
- * @author yiding.he
- */
 @SuppressWarnings({"unchecked"})
 public class JsonUtils {
 

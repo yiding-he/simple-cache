@@ -3,7 +3,7 @@ package com.hyd.simplecache.redis;
 import com.hyd.simplecache.CacheAdapter;
 import com.hyd.simplecache.CacheConfiguration;
 import com.hyd.simplecache.RedisConfiguration;
-import org.nustaq.serialization.FSTConfiguration;
+import com.hyd.simplecache.utils.FstUtils;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.ShardedJedis;
 import redis.clients.jedis.ShardedJedisPool;
@@ -15,13 +15,6 @@ import redis.clients.jedis.ShardedJedisPool;
  */
 public class RedisAdapter implements CacheAdapter {
 
-    private static FSTConfiguration FST;
-
-    static {
-        FST = FSTConfiguration.createDefaultConfiguration();
-        FST.setForceSerializable(true);
-    }
-
     private RedisConfiguration configuration;
 
     private final ShardedJedisPool shardedJedisPool;
@@ -32,11 +25,11 @@ public class RedisAdapter implements CacheAdapter {
     }
 
     private static Object deserialize(byte[] bytes) {
-        return FST.asObject(bytes);
+        return FstUtils.deserialize(bytes);
     }
 
     private static byte[] serialize(Object o) {
-        return FST.asByteArray(o);
+        return FstUtils.serialize(o);
     }
 
     @Override
