@@ -1,5 +1,7 @@
-package com.hyd.simplecache;
+package com.hyd.simplecache.redis;
 
+import com.hyd.simplecache.CacheAdapterFactory;
+import com.hyd.simplecache.CacheConfiguration;
 import redis.clients.jedis.JedisShardInfo;
 
 import java.util.Collections;
@@ -11,6 +13,10 @@ import java.util.List;
  * @author Yiding
  */
 public class RedisConfiguration implements CacheConfiguration {
+
+    static {
+        CacheAdapterFactory.register(RedisConfiguration.class, conf -> new RedisAdapter((RedisConfiguration) conf));
+    }
 
     private List<JedisShardInfo> shardInfoList;
 

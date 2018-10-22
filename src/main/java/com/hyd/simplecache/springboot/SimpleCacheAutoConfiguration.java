@@ -1,7 +1,7 @@
 package com.hyd.simplecache.springboot;
 
-import com.hyd.simplecache.MemcachedConfiguration;
-import com.hyd.simplecache.RedisConfiguration;
+import com.hyd.simplecache.memcached.MemcachedConfiguration;
+import com.hyd.simplecache.redis.RedisConfiguration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.util.HashMap;

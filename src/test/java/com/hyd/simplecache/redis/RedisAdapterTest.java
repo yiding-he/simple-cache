@@ -1,6 +1,5 @@
 package com.hyd.simplecache.redis;
 
-import com.hyd.simplecache.RedisConfiguration;
 import com.hyd.simplecache.bean.User;
 import org.junit.Test;
 

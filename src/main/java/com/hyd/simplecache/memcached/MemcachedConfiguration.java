@@ -1,6 +1,16 @@
-package com.hyd.simplecache;
+package com.hyd.simplecache.memcached;
+
+import com.hyd.simplecache.CacheAdapterFactory;
+import com.hyd.simplecache.CacheConfiguration;
 
 public class MemcachedConfiguration implements CacheConfiguration {
+
+    static {
+        CacheAdapterFactory.register(
+                MemcachedConfiguration.class,
+                conf -> new MemcachedAdapter((MemcachedConfiguration) conf)
+        );
+    }
 
     private String host = "localhost";
 

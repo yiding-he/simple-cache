@@ -2,7 +2,6 @@ package com.hyd.simplecache.memcached;
 
 import com.hyd.simplecache.CacheAdapter;
 import com.hyd.simplecache.CacheConfiguration;
-import com.hyd.simplecache.MemcachedConfiguration;
 import com.hyd.simplecache.SimpleCacheException;
 import com.hyd.simplecache.utils.FstUtils;
 import com.spotify.folsom.BinaryMemcacheClient;

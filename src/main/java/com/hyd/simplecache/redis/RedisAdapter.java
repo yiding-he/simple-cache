@@ -2,7 +2,6 @@ package com.hyd.simplecache.redis;
 
 import com.hyd.simplecache.CacheAdapter;
 import com.hyd.simplecache.CacheConfiguration;
-import com.hyd.simplecache.RedisConfiguration;
 import com.hyd.simplecache.utils.FstUtils;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.ShardedJedis;

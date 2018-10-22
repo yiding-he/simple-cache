@@ -1,6 +1,5 @@
 package com.hyd.simplecache.memcached;
 
-import com.hyd.simplecache.MemcachedConfiguration;
 import com.hyd.simplecache.SimpleCache;
 import com.hyd.simplecache.bean.User;
 import org.junit.Test;
