@@ -3,6 +3,8 @@ package com.hyd.simplecache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.function.Supplier;
+
 /**
  * <p>SimpleCache 的主要使用类。</p>
  * <p>这里对内容的存取都使用了 {@link Element} 类进行包装，存放的时候包装成 Element
@@ -51,7 +53,7 @@ public class SimpleCache {
      * @param element 要缓存的元素
      */
     public void putElement(String key, Element element) {
-        this.cacheAdapter.put(key, element, false);
+        putElement(key, element, false);
     }
 
     /**
@@ -65,8 +67,19 @@ public class SimpleCache {
         if (timeToLiveSeconds > 0) {
             this.cacheAdapter.put(key, element, timeToLiveSeconds);
         } else {
-            this.cacheAdapter.put(key, element, true);
+            putElement(key, element, true);
         }
+    }
+
+    /**
+     * 保存 Element 对象到缓存，并指定超时时间或永久保存
+     *
+     * @param key     键
+     * @param element 要缓存的元素
+     * @param forever 是否永久保存
+     */
+    public void putElement(String key, Element element, boolean forever) {
+        this.cacheAdapter.put(key, element, forever);
     }
 
     /**
@@ -76,8 +89,8 @@ public class SimpleCache {
      * @param value 对象值
      */
     public void put(String key, Object value) {
-        Element element = new Element(value);
-        this.cacheAdapter.put(key, element, false);
+        Element element = (value instanceof Element) ? (Element) value : new Element(value);
+        putElement(key, element);
     }
 
     /**
@@ -87,8 +100,8 @@ public class SimpleCache {
      * @param value 对象值
      */
     public void put(String key, Object value, boolean forever) {
-        Element element = new Element(value);
-        this.cacheAdapter.put(key, element, forever);
+        Element element = (value instanceof Element) ? (Element) value : new Element(value);
+        putElement(key, element, forever);
     }
 
     /**
@@ -99,7 +112,7 @@ public class SimpleCache {
      * @param timeToLive 本条缓存的保存时长（秒）
      */
     public void put(String key, Object value, int timeToLive) {
-        Element element = new Element(value);
+        Element element = (value instanceof Element) ? (Element) value : new Element(value);
         this.cacheAdapter.put(key, element, timeToLive);
     }
 
@@ -137,11 +150,19 @@ public class SimpleCache {
         return (T) value;
     }
 
-    public <T> T get(String key, Provider<T> provider) {
+    /**
+     * 从缓存获取对象，如果缓存当中不存在，则通过 supplier 方法获取并存入缓存
+     *
+     * @param key      缓存键
+     * @param supplier 获取对象的方法
+     *
+     * @return 缓存内容或获取结果
+     */
+    public <T> T get(String key, Supplier<T> supplier) {
         Object value = this.cacheAdapter.get(key);
 
         if (value == null) {
-            value = provider.provide();
+            value = supplier.get();
             if (value != null) {
                 put(key, value);
             }
@@ -155,23 +176,67 @@ public class SimpleCache {
         return (T) value;
     }
 
-    public <T> T get(String key, Provider<T> provider, int cacheTimeoutSeconds) {
+    /**
+     * 从缓存获取对象，如果缓存当中不存在，则通过 supplier 方法获取并存入缓存
+     *
+     * @param key           缓存键
+     * @param expirySeconds 缓存时间（某些缓存实现可能不支持为单个 key 设置缓存时间）
+     * @param supplier      获取对象的方法
+     *
+     * @return 缓存内容或获取结果
+     */
+    public <T> T get(String key, int expirySeconds, Supplier<T> supplier) {
+
+        if (expirySeconds <= 0) {
+            throw new IllegalArgumentException("Argument 'expirySeconds' must be positive");
+        }
+
         Object value = this.cacheAdapter.get(key);
 
         if (value == null) {
-            value = provider.provide();
+            value = supplier.get();
             if (value != null) {
-                if (cacheTimeoutSeconds < 0) {
-                    put(key, value, true);
-                } else if (cacheTimeoutSeconds > 0) {
-                    put(key, value, cacheTimeoutSeconds);
-                }
+                put(key, value, expirySeconds);
             }
         }
 
         // 剥去包装
         if (value instanceof Element) {
             value = ((Element) value).getValue();
+        }
+
+        return (T) value;
+    }
+
+    /**
+     * 从缓存获取对象，如果
+     * 1. 缓存当中不存在，则通过 supplier 方法获取并存入缓存；
+     * 2. 缓存当中存在，则返回缓存内容，同时如果发现缓存过期，则在后台重新获取。
+     *
+     * @param key      缓存键
+     * @param supplier 获取对象的方法
+     *
+     * @return 缓存内容或获取结果
+     */
+    public <T> T getAsync(String key, int expirySeconds, Supplier<T> supplier) {
+        Object value = this.cacheAdapter.get(key);
+
+        if (value == null) {
+            value = supplier.get();
+            if (value != null) {
+                Element element = (value instanceof Element) ? (Element) value : new Element(value);
+                element.setExpiry(expirySeconds * 1000);
+                putElement(key, element);
+            }
+        }
+
+        // 剥去包装
+        if (value instanceof Element) {
+            Element element = (Element) value;
+            if (element.expired()) {
+                AsyncCacheLoader.addTask(key, cacheAdapter, supplier, expirySeconds * 1000);
+            }
+            value = element.getValue();
         }
 
         return (T) value;
