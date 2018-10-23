@@ -1,10 +1,8 @@
-## DEPRECATED(DEPRECATED)
-
-*本项目已经停止开发，因为该项目开始开发的时候 Spring 尚未流行起来，作者现在更习惯用 Spring Cache*
-
 ## No, not deprecated
 
-*用了一阵子发现 Spring Cache 仍然存在缺陷（比如内部方法无法采用 @Cached 注解），所以 simple-cache 还得继续用。*
+*用了一阵子 Spring Cache，发现有不爽的地方（比如内部方法无法采用 @Cached 注解），所以 simple-cache 还得继续用。*
+
+*V3.0 版本正在开发中。*
 
 # simple-cache
 
