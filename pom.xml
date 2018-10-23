@@ -23,6 +23,7 @@
             <optional>true</optional>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/com.spotify/folsom -->
         <dependency>
             <groupId>com.spotify</groupId>
             <artifactId>folsom</artifactId>
@@ -51,6 +52,14 @@
             <groupId>org.ehcache</groupId>
             <artifactId>ehcache</artifactId>
             <version>3.6.1</version>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.cache2k/cache2k-core -->
+        <dependency>
+            <groupId>org.cache2k</groupId>
+            <artifactId>cache2k-core</artifactId>
+            <version>1.2.0.Final</version>
             <optional>true</optional>
         </dependency>
 
