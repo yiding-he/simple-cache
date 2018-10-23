@@ -2,8 +2,6 @@ package com.hyd.simplecache;
 
 /**
  * SimpleCache 相关异常
- *
- * @author 贺一丁
  */
 public class SimpleCacheException extends RuntimeException {
 

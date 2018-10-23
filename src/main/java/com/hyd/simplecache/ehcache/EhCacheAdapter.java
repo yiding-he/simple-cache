@@ -13,6 +13,13 @@ import org.ehcache.expiry.ExpiryPolicy;
 
 import java.time.Duration;
 
+/**
+ * 使用 EhCache 实现的缓存包装。
+ *
+ * 注意 EhCache 不支持为单个 key 设置超时时间，所以
+ * {@link #put(String, Object, boolean)} 和 {@link #put(String, Object, int)}
+ * 的最后一个参数都是无效的。
+ */
 public class EhCacheAdapter implements CacheAdapter {
 
     private static final CacheManager CACHE_MANAGER;
@@ -39,7 +46,7 @@ public class EhCacheAdapter implements CacheAdapter {
                 .withExpiry(expiry)
                 .build();
 
-        cache = CACHE_MANAGER.createCache("default", cacheConfiguration);
+        cache = CACHE_MANAGER.createCache(configuration.getAlias(), cacheConfiguration);
     }
 
     @Override
@@ -52,11 +59,13 @@ public class EhCacheAdapter implements CacheAdapter {
         return cache.get(key);
     }
 
+    // last parameter not supported by EhCache
     @Override
     public void put(String key, Object value, boolean forever) {
         cache.put(key, value);
     }
 
+    // last parameter not supported by EhCache
     @Override
     public void put(String key, Object value, int timeToLiveSeconds) {
         cache.put(key, value);

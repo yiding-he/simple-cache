@@ -13,8 +13,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * 对 Memcached 缓存的包装
- *
- * @author 贺一丁
  */
 public class MemcachedAdapter implements CacheAdapter {
 

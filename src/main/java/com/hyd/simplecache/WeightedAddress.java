@@ -2,8 +2,6 @@ package com.hyd.simplecache;
 
 /**
  * 带权重的服务器地址
- *
- * @author 贺一丁
  */
 public class WeightedAddress {
 

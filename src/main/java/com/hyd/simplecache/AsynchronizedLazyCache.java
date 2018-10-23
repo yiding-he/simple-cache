@@ -14,8 +14,6 @@ import java.util.concurrent.TimeUnit;
 /**
  * 用于异步刷新操作的缓存。异步刷新操作只要缓存中有值，就不会挂起任何线程。
  * 注意：异步刷新的缓存的保存时间为缓存允许的最长时间（包括永久保存）。
- *
- * @author 贺一丁
  */
 @SuppressWarnings({"unchecked"})
 public abstract class AsynchronizedLazyCache<T> extends LazyCache<T> {
