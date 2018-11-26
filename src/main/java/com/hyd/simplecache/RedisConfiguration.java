@@ -15,7 +15,7 @@ public class RedisConfiguration implements CacheConfiguration {
 
     private List<JedisShardInfo> shardInfoList;
 
-    private int timeToIdleSeconds = 3600;
+    private int timeToIdleSeconds = 0;
 
     private int timeToLiveSeconds = 3600;
 
