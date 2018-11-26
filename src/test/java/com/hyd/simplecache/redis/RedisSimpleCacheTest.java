@@ -23,26 +23,4 @@ public class RedisSimpleCacheTest {
         Assert.assertEquals(user.getUsername(), cachedUser.getUsername());
         Assert.assertEquals(user.getPassword(), cachedUser.getPassword());
     }
-
-    @Test
-    public void testAuth() throws Exception {
-        RedisConfiguration c = new RedisConfiguration("127.0.0.1", 6379, "pass123");
-        c.setTimeToLiveSeconds(60);
-
-        SimpleCache cache = new SimpleCache(c);
-        cache.put("name", "simple-cache");
-        String name = cache.get("name");
-        Assert.assertEquals("simple-cache", name);
-    }
-
-    @Test
-    public void testAuthFail() throws Exception {
-        RedisConfiguration c = new RedisConfiguration("127.0.0.1", 6379, "pass1234");
-        c.setTimeToLiveSeconds(60);
-
-        SimpleCache cache = new SimpleCache(c);
-        cache.put("name", "simple-cache");
-        String name = cache.get("name");
-        Assert.assertEquals("simple-cache", name);
-    }
 }
