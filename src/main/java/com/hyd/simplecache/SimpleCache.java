@@ -150,6 +150,11 @@ public class SimpleCache {
      * @param value 对象值
      */
     public void put(String key, Object value, boolean forever) {
+
+        if (key == null || value == null) {
+            throw new IllegalArgumentException("key or value is null");
+        }
+
         Element element = new Element(value);
         if (forever) {
             this.putElementForever(key, element);
@@ -166,6 +171,11 @@ public class SimpleCache {
      * @param timeToLive 本条缓存的保存时长（秒）
      */
     public void put(String key, Object value, int timeToLive) {
+
+        if (key == null || value == null) {
+            throw new IllegalArgumentException("key or value is null");
+        }
+
         Element element = new Element(value);
         this.putElementWithTtl(key, element, timeToLive);
     }
@@ -212,6 +222,11 @@ public class SimpleCache {
      * @return 对象值
      */
     public <T> T get(String key) {
+
+        if (key == null) {
+            return null;
+        }
+
         Object value = this.cacheAdapter.get(key);
 
         if (value == null) {
@@ -227,6 +242,11 @@ public class SimpleCache {
     }
 
     public <T> T get(String key, Provider<T> provider) {
+
+        if (key == null) {
+            return null;
+        }
+
         Object value = this.cacheAdapter.get(key);
 
         if (value == null) {
@@ -245,6 +265,11 @@ public class SimpleCache {
     }
 
     public <T> T get(String key, Provider<T> provider, int cacheTimeoutSeconds) {
+
+        if (key == null) {
+            return null;
+        }
+
         Object value = this.cacheAdapter.get(key);
 
         if (value == null) {
@@ -277,6 +302,11 @@ public class SimpleCache {
      */
     @SuppressWarnings("unchecked")
     public <T> T get(String key, Class<T> type) {
+
+        if (key == null) {
+            return null;
+        }
+
         T value = get(key);
 
         if (value == null) {
@@ -322,6 +352,11 @@ public class SimpleCache {
      * @param key 要删除的 key
      */
     public void delete(String key) {
+
+        if (key == null) {
+            return;
+        }
+
         if (deleteInterceptor == null || deleteInterceptor.cacheDelete(key)) {
             this.cacheAdapter.delete(key);
         }
