@@ -79,7 +79,14 @@ public abstract class LazyCache<T extends Serializable> {
         T value = null;
 
         synchronized (LockFactory.getLock(cacheKey)) {
-            Element<Serializable> element = this.simpleCache.getElement(cacheKey);
+            Element<Serializable> element = null;
+
+            try {
+                element = this.simpleCache.getElement(cacheKey);
+            } catch (Exception e) {
+                log.warn("Error parsing cache value for '" + cacheKey + "', deleting cache entry");
+                this.simpleCache.delete(cacheKey);
+            }
 
             if (element == null) {
                 try {
