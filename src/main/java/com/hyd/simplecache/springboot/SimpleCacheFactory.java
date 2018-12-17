@@ -15,12 +15,15 @@ public class SimpleCacheFactory {
     private Map<String, SimpleCache> simpleCacheMappings = new HashMap<>();
 
     public SimpleCacheFactory(SimpleCacheAutoConfiguration configuration) {
-        if (configuration.getRedis() != null) {
-            configuration.getRedis().forEach(this::register);
-        }
+        register(configuration.getMemcached());
+        register(configuration.getRedis());
+        register(configuration.getCache2k());
+        register(configuration.getCaffeine());
+    }
 
-        if (configuration.getMemcached() != null) {
-            configuration.getMemcached().forEach(this::register);
+    private void register(Map<String, ? extends CacheConfiguration> configs) {
+        if (configs != null) {
+            configs.forEach(this::register);
         }
     }
 
@@ -30,7 +33,7 @@ public class SimpleCacheFactory {
         }
 
         simpleCacheMappings.put(name, new SimpleCache(config));
-        LOG.info("Cache '" + name + "' registered.");
+        LOG.info("Cache '" + name + "'[" + config.getType() + "] created.");
     }
 
     public SimpleCache getSimpleCache(String name) {

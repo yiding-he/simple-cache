@@ -4,8 +4,12 @@ import com.hyd.simplecache.CacheAdapter;
 import com.hyd.simplecache.CacheConfiguration;
 import com.hyd.simplecache.utils.FstUtils;
 import redis.clients.jedis.JedisPoolConfig;
+import redis.clients.jedis.JedisShardInfo;
 import redis.clients.jedis.ShardedJedis;
 import redis.clients.jedis.ShardedJedisPool;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * created at 2015/3/16
@@ -20,7 +24,17 @@ public class RedisAdapter implements CacheAdapter {
 
     public RedisAdapter(RedisConfiguration configuration) {
         this.configuration = configuration;
-        shardedJedisPool = new ShardedJedisPool(new JedisPoolConfig(), configuration.getShardInfoList());
+        shardedJedisPool = new ShardedJedisPool(new JedisPoolConfig(), createShardInfoList(configuration));
+    }
+
+    private List<JedisShardInfo> createShardInfoList(RedisConfiguration c) {
+        return c.getServers().stream()
+                .map(addr -> {
+                    JedisShardInfo shardInfo = new JedisShardInfo(addr.getHost(), addr.getPort());
+                    shardInfo.setPassword(addr.getPassword());
+                    return shardInfo;
+                })
+                .collect(Collectors.toList());
     }
 
     private static Object deserialize(byte[] bytes) {
