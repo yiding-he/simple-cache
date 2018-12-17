@@ -15,10 +15,11 @@ public class SimpleCacheFactory {
     private Map<String, SimpleCache> simpleCacheMappings = new HashMap<>();
 
     public SimpleCacheFactory(SimpleCacheAutoConfiguration configuration) {
-        register(configuration.getMemcached());
-        register(configuration.getRedis());
         register(configuration.getCache2k());
         register(configuration.getCaffeine());
+        register(configuration.getEhcache());
+        register(configuration.getMemcached());
+        register(configuration.getRedis());
     }
 
     private void register(Map<String, ? extends CacheConfiguration> configs) {

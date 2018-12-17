@@ -2,6 +2,7 @@ package com.hyd.simplecache.springboot;
 
 import com.hyd.simplecache.cache2k.Cache2kConfiguration;
 import com.hyd.simplecache.caffeine.CaffeineConfiguration;
+import com.hyd.simplecache.ehcache.EhCacheConfiguration;
 import com.hyd.simplecache.memcached.MemcachedConfiguration;
 import com.hyd.simplecache.redis.RedisConfiguration;
 import lombok.Data;
@@ -21,4 +22,6 @@ public class SimpleCacheAutoConfiguration {
     private Map<String, CaffeineConfiguration> caffeine = new HashMap<>();
 
     private Map<String, Cache2kConfiguration> cache2k = new HashMap<>();
+
+    private Map<String, EhCacheConfiguration> ehcache = new HashMap<>();
 }

@@ -28,5 +28,9 @@ public class SpringBootTestApplication {
         cache = this.simpleCacheFactory.getSimpleCache("caffeine1");
         cache.put("mail", "yiding.he@gmail.com");
         System.out.println("mail: " + cache.get("mail"));
+
+        cache = this.simpleCacheFactory.getSimpleCache("ehcache1");
+        cache.put("mail", "yiding.he@gmail.com");
+        System.out.println("mail: " + cache.get("mail"));
     }
 }
