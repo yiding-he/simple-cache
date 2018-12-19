@@ -21,7 +21,6 @@ public class SimpleCacheAutoConfigurator {
     public SimpleCacheFactory simpleCacheFactory(
             SimpleCacheAutoConfiguration configuration
     ) {
-        System.out.println("*** SimpleCacheAutoConfigurator is working ***");
         return new SimpleCacheFactory(configuration);
     }
 
