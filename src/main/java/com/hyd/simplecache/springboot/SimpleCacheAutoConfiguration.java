@@ -15,6 +15,10 @@ import java.util.Map;
 @Data
 public class SimpleCacheAutoConfiguration {
 
+    public SimpleCacheAutoConfiguration() {
+        System.out.println("*** SimpleCacheAutoConfiguration initialized. ***");
+    }
+
     private Map<String, RedisConfiguration> redis = new HashMap<>();
 
     private Map<String, MemcachedConfiguration> memcached = new HashMap<>();
