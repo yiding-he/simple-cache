@@ -93,21 +93,18 @@ import com.hyd.simplecache.SimpleCache;
 @Configuration
 public class Conf {
     
-    @Autowired
-    private Caches caches;
-    
     @Bean
-    public SimpleCache remoteCache() {
+    public SimpleCache remoteCache(Caches caches) {
         return caches.get("REMOTE");
     }
     
     @Bean
-    public SimpleCache localCache1() {
+    public SimpleCache localCache1(Caches caches) {
         return caches.get("LOCAL1");
     }
     
     @Bean
-    public SimpleCache localCache2() {
+    public SimpleCache localCache2(Caches caches) {
         return caches.get("LOCAL2");
     }
 }
