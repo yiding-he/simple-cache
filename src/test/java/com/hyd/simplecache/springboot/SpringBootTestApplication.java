@@ -7,32 +7,37 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
-import javax.annotation.PostConstruct;
-
 @SpringBootApplication
 public class SpringBootTestApplication {
 
     @Autowired
-    private SimpleCacheFactory simpleCacheFactory;
+    private Caches caches;
 
     public static void main(String[] args) {
         SpringApplication.run(SpringBootTestApplication.class, args);
     }
 
     @Bean
-    CommandLineRunner init() {
+    SimpleCache caffeineCache() {
+        return caches.get("caffeine1");
+    }
+
+    @Bean
+    CommandLineRunner init(SimpleCache caffeineCache) {
         return args -> {
+            System.out.println("Bean 'caffeineCache' is " + caffeineCache);
+
             SimpleCache cache;
 
-            cache = this.simpleCacheFactory.getSimpleCache("local");
+            cache = caches.get("local");
             cache.put("mail", "yiding.he@gmail.com");
             System.out.println("mail: " + cache.get("mail"));
 
-            cache = this.simpleCacheFactory.getSimpleCache("caffeine1");
+            cache = caches.get("caffeine1");
             cache.put("mail", "yiding.he@gmail.com");
             System.out.println("mail: " + cache.get("mail"));
 
-            cache = this.simpleCacheFactory.getSimpleCache("ehcache1");
+            cache = caches.get("ehcache1");
             cache.put("mail", "yiding.he@gmail.com");
             System.out.println("mail: " + cache.get("mail"));
         };

@@ -7,19 +7,24 @@ import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BiConsumer;
 
-public class SimpleCacheFactory {
+public class Caches {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SimpleCacheFactory.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Caches.class);
 
     private Map<String, SimpleCache> simpleCacheMappings = new HashMap<>();
 
-    public SimpleCacheFactory(SimpleCacheAutoConfiguration configuration) {
+    public Caches(SimpleCacheAutoConfiguration configuration) {
         register(configuration.getCache2k());
         register(configuration.getCaffeine());
         register(configuration.getEhcache());
         register(configuration.getMemcached());
         register(configuration.getRedis());
+    }
+
+    public void forEach(BiConsumer<String, SimpleCache> consumer) {
+        this.simpleCacheMappings.forEach(consumer);
     }
 
     private void register(Map<String, ? extends CacheConfiguration> configs) {
@@ -37,7 +42,7 @@ public class SimpleCacheFactory {
         LOG.info("Cache '" + name + "'[" + config.getType() + "] created.");
     }
 
-    public SimpleCache getSimpleCache(String name) {
+    public SimpleCache get(String name) {
         return simpleCacheMappings.get(name);
     }
 }
