@@ -42,6 +42,8 @@ PageData pageData = cache.getAsync(
 通过下面几种方式之一来创建：
 
 ```java
+new SimpleCache(new Cache2kConfiguration());
+new SimpleCache(new CaffeineConfiguration());
 new SimpleCache(new EhCacheConfiguration());
 new SimpleCache(new MemcachedConfiguration());
 new SimpleCache(new RedisConfiguration());
@@ -50,19 +52,64 @@ new SimpleCache(new RedisConfiguration());
 
 ## Spring Boot 中自动初始化
 
-在 Spring Boot 中只需要添加配置即可直接使用 SimpleCache 对象。下面是一个例子：
+在 Spring Boot 中可以添加多个缓存配置，然后用 `Caches` 类获取各自的 SimpleCache 对象。下面是一个例子：
 
 ```properties
-# application.properties
-simple-cache.memcached.cache1.host=localhost
-simple-cache.memcached.cache1.port=11211
+# memcached instance
+simple-cache.memcached.REMOTE.host=localhost
+simple-cache.memcached.REMOTE.port=11211
+simple-cache.memcached.REMOTE.time-to-live-seconds=3600
+
+# cache2k instances
+simple-cache.cache2k.LOCAL1.entry-capacity=10000
+simple-cache.cache2k.LOCAL2.entry-capacity=10000
 ```
 
-就可以直接在代码里面引用了：
+无需额外编码，即可在代码里面使用缓存对象：
 
 ```java
-@Autowired
-private SimpleCache simpleCache;
+import com.hyd.simplecache.springboot.Caches;
+import com.hyd.simplecache.SimpleCache;
+
+public class CacheDemo {
+    
+    @Autowired
+    private Caches caches;
+    
+    public void func() {
+        SimpleCache remoteCache = caches.get("REMOTE");
+        SimpleCache localCache1 = caches.get("LOCAL1");
+        SimpleCache localCache2 = caches.get("LOCAL2");
+    }
+}
 ```
 
-更多文档在 docs 目录下。
+当然你也可以在 `@Configuration` 类中定义单独的 SimpleCache：
+
+```java
+import com.hyd.simplecache.springboot.Caches;
+import com.hyd.simplecache.SimpleCache;
+
+@Configuration
+public class Conf {
+    
+    @Autowired
+    private Caches caches;
+    
+    @Bean
+    public SimpleCache remoteCache() {
+        return caches.get("REMOTE");
+    }
+    
+    @Bean
+    public SimpleCache localCache1() {
+        return caches.get("LOCAL1");
+    }
+    
+    @Bean
+    public SimpleCache localCache2() {
+        return caches.get("LOCAL2");
+    }
+}
+```
+
