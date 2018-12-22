@@ -2,6 +2,7 @@ package com.hyd.simplecache.redis;
 
 import com.hyd.simplecache.CacheAdapterFactory;
 import com.hyd.simplecache.CacheConfiguration;
+import com.hyd.simplecache.serialization.PredefinedSerializeMethod;
 
 import java.util.Collections;
 import java.util.List;
@@ -25,11 +26,23 @@ public class RedisConfiguration implements CacheConfiguration {
 
     ////////////////////////////////////////////////////////////
 
-    private List<RedisAddress> servers;
+    private byte serializeMethod = PredefinedSerializeMethod.FST.getTag();
+
+    private List<RedisAddress> servers =
+            Collections.singletonList(new RedisAddress("localhost", 6379, null));
 
     private int timeToIdleSeconds = 3600;
 
     private int timeToLiveSeconds = 3600;
+
+    public void setSerializeMethod(byte serializeMethod) {
+        this.serializeMethod = serializeMethod;
+    }
+
+    @Override
+    public byte getSerializeMethod() {
+        return serializeMethod;
+    }
 
     public void setServers(List<RedisAddress> servers) {
         this.servers = servers;

@@ -3,7 +3,7 @@ package com.hyd.simplecache.memcached;
 import com.hyd.simplecache.CacheAdapter;
 import com.hyd.simplecache.CacheConfiguration;
 import com.hyd.simplecache.SimpleCacheException;
-import com.hyd.simplecache.utils.FstUtils;
+import com.hyd.simplecache.serialization.SerializerFactory;
 import com.spotify.folsom.BinaryMemcacheClient;
 import com.spotify.folsom.ConnectFuture;
 import com.spotify.folsom.MemcacheClientBuilder;
@@ -48,14 +48,33 @@ public class MemcachedAdapter implements CacheAdapter {
         return configuration;
     }
 
+    private byte[] getBytes(String key) throws Exception {
+        return client.get(key).toCompletableFuture().get();
+    }
+
     @Override
     public Object get(String key) throws SimpleCacheException {
         try {
-            byte[] bytes = client.get(key).toCompletableFuture().get();
+            byte[] bytes = getBytes(key);
             if (bytes == null) {
                 return null;
             }
-            return FstUtils.deserialize(bytes);
+            byte tag = bytes[0];
+            return SerializerFactory.getSerializer(tag).deserialize(bytes);
+        } catch (Exception e) {
+            throw new SimpleCacheException(e);
+        }
+    }
+
+    @Override
+    public <T> T get(String key, Class<T> type) {
+        try {
+            byte[] bytes = getBytes(key);
+            if (bytes == null) {
+                return null;
+            }
+            byte tag = bytes[0];
+            return SerializerFactory.getSerializer(tag).deserialize(bytes, type);
         } catch (Exception e) {
             throw new SimpleCacheException(e);
         }
@@ -99,7 +118,8 @@ public class MemcachedAdapter implements CacheAdapter {
      */
     private void putDirectly(String key, Object value, int expireSeconds) {
         try {
-            byte[] bytes = FstUtils.serialize(value);
+            byte tag = configuration.getSerializeMethod();
+            byte[] bytes = SerializerFactory.getSerializer(tag).serialize(value);
             this.client.set(key, bytes, expireSeconds);
         } catch (Exception e) {
             throw new SimpleCacheException(e);

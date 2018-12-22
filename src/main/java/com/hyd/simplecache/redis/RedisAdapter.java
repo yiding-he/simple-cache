@@ -2,7 +2,8 @@ package com.hyd.simplecache.redis;
 
 import com.hyd.simplecache.CacheAdapter;
 import com.hyd.simplecache.CacheConfiguration;
-import com.hyd.simplecache.utils.FstUtils;
+import com.hyd.simplecache.serialization.Serializer;
+import com.hyd.simplecache.serialization.SerializerFactory;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.JedisShardInfo;
 import redis.clients.jedis.ShardedJedis;
@@ -37,12 +38,22 @@ public class RedisAdapter implements CacheAdapter {
                 .collect(Collectors.toList());
     }
 
-    private static Object deserialize(byte[] bytes) {
-        return FstUtils.deserialize(bytes);
+    private Object deserialize(byte[] bytes) {
+        byte tag = bytes[0];
+        Serializer serializer = SerializerFactory.getSerializer(tag);
+        return serializer.deserialize(bytes);
     }
 
-    private static byte[] serialize(Object o) {
-        return FstUtils.serialize(o);
+    private <T> T deserialize(byte[] bytes, Class<T> type) {
+        byte tag = bytes[0];
+        Serializer serializer = SerializerFactory.getSerializer(tag);
+        return serializer.deserialize(bytes, type);
+    }
+
+    private byte[] serialize(Object o) {
+        byte tag = configuration.getSerializeMethod();
+        Serializer serializer = SerializerFactory.getSerializer(tag);
+        return serializer.serialize(o);
     }
 
     @Override
@@ -66,11 +77,26 @@ public class RedisAdapter implements CacheAdapter {
             }
 
             byte[] bytes = jedis.get(key.getBytes());
-
             if (bytes == null) {
                 return null;
             } else {
                 return deserialize(bytes);
+            }
+        });
+    }
+
+    @Override
+    public <T> T get(String key, Class<T> type) {
+        return withJedis(jedis -> {
+            if (configuration.getTimeToIdleSeconds() > 0) {
+                jedis.expire(key, configuration.getTimeToIdleSeconds());
+            }
+
+            byte[] bytes = jedis.get(key.getBytes());
+            if (bytes == null) {
+                return null;
+            } else {
+                return deserialize(bytes, type);
             }
         });
     }
@@ -90,11 +116,13 @@ public class RedisAdapter implements CacheAdapter {
     @Override
     public void put(final String key, final Object value, final boolean forever) {
         withJedis((JedisExecutor<Void>) jedis -> {
+            byte[] bytes = serialize(value);
+
             if (forever) {
-                jedis.set(key.getBytes(), serialize(value));
+                jedis.set(key.getBytes(), bytes);
             } else {
                 int ttl = configuration.getTimeToLiveSeconds();
-                jedis.setex(key.getBytes(), ttl, serialize(value));
+                jedis.setex(key.getBytes(), ttl, bytes);
             }
             return null;
         });

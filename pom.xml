@@ -17,17 +17,30 @@
 
     <dependencies>
 
+        <!-- Required-->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>1.7.25</version>
         </dependency>
         <dependency>
+            <groupId>de.ruedigermoeller</groupId>
+            <artifactId>fst</artifactId>
+            <version>2.57</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>1.2.47</version>
+        </dependency>
+
+        <!-- Optional -->
+        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.18.4</version>
+            <scope>provided</scope>
         </dependency>
-
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
@@ -35,19 +48,13 @@
             <optional>true</optional>
         </dependency>
 
+        <!-- ====Cache implementations==== -->
+
         <!-- https://mvnrepository.com/artifact/com.spotify/folsom -->
         <dependency>
             <groupId>com.spotify</groupId>
             <artifactId>folsom</artifactId>
             <version>1.2.0</version>
-            <optional>true</optional>
-        </dependency>
-
-        <!-- https://mvnrepository.com/artifact/de.ruedigermoeller/fst -->
-        <dependency>
-            <groupId>de.ruedigermoeller</groupId>
-            <artifactId>fst</artifactId>
-            <version>2.57</version>
             <optional>true</optional>
         </dependency>
 
@@ -83,6 +90,9 @@
             <optional>true</optional>
         </dependency>
 
+        <!-- ===================================== -->
+
+        <!-- Unit Testing -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>

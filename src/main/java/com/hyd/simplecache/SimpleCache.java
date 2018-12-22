@@ -136,7 +136,6 @@ public class SimpleCache {
         Object value = this.cacheAdapter.get(key);
 
         if (value == null) {
-            LOG.info("Cache missing: {}", key);
             return null;
         }
 
@@ -253,18 +252,8 @@ public class SimpleCache {
      */
     @SuppressWarnings("unchecked")
     public <T> T get(String key, Class<T> type) {
-        Object value = get(key);
-
-        if (value == null) {
-            return null;
-        }
-
-        if (!type.isAssignableFrom(value.getClass())) {
-            throw new ClassCastException("Cache value of \"" + key + "\" of type "
-                    + value.getClass() + " cannot be cast to " + type.getClass());
-        }
-
-        return (T) value;
+        Element<T> value = this.cacheAdapter.get(key, Element.class);
+        return value == null ? null : value.getValue();
     }
 
     /**

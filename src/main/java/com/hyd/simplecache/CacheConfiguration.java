@@ -11,4 +11,8 @@ public interface CacheConfiguration {
     default String getType() {
         return Str.removeEnd(this.getClass().getSimpleName(), "Configuration");
     }
+
+    default byte getSerializeMethod() {
+        return 0;
+    }
 }

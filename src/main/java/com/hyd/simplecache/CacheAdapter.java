@@ -22,6 +22,19 @@ public interface CacheAdapter {
     Object get(String key);
 
     /**
+     * 根据类型获取缓存值
+     *
+     * @param key  缓存键
+     * @param type 要转换的对象类型
+     *
+     * @return 缓存值
+     */
+    @SuppressWarnings("unchecked")
+    default <T> T get(String key, Class<T> type) {
+        return (T) get(key);
+    }
+
+    /**
      * 设置缓存值
      *
      * @param key     缓存键
