@@ -1,5 +1,6 @@
 package com.hyd.simplecache;
 
+import com.hyd.simplecache.serialization.PredefinedSerializeMethod;
 import com.hyd.simplecache.utils.Str;
 
 /**
@@ -12,7 +13,15 @@ public interface CacheConfiguration {
         return Str.removeEnd(this.getClass().getSimpleName(), "Configuration");
     }
 
+    /**
+     * CacheAdapter 如果支持可选的序列化类型，则可以通过本方法
+     * 获取用户选择的序列化类型。
+     * <p>
+     * 缺省情况下本方法返回 {@link PredefinedSerializeMethod#FST}
+     *
+     * @return 用户选择的序列化类型
+     */
     default byte getSerializeMethod() {
-        return 0;
+        return PredefinedSerializeMethod.FST.getTag();
     }
 }

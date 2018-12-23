@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -108,7 +109,7 @@ public class AsyncCacheLoader {
             if (o == null || getClass() != o.getClass()) return false;
 
             RefreshTask task = (RefreshTask) o;
-            return !(cacheKey != null ? !cacheKey.equals(task.cacheKey) : task.cacheKey != null);
+            return Objects.equals(cacheKey, task.cacheKey);
         }
 
         @Override
