@@ -1,5 +1,7 @@
 package com.hyd.simplecache.serialization;
 
+import com.hyd.simplecache.Element;
+
 /**
  * 将对象序列化/反序列化的类
  */
@@ -32,8 +34,8 @@ public interface Serializer {
      * @return 反序列化结果
      */
     @SuppressWarnings("unchecked")
-    default <T> T deserialize(byte[] bytes, Class<T> type) {
-        return (T) deserialize(bytes);
+    default <T> Element<T> deserialize(byte[] bytes, Class<T> type) {
+        return (Element<T>) deserialize(bytes);
     }
 
     default byte[] prependBytes(byte[] bytes, byte tag) {

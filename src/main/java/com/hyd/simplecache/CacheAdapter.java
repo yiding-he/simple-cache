@@ -30,8 +30,8 @@ public interface CacheAdapter {
      * @return 缓存值
      */
     @SuppressWarnings("unchecked")
-    default <T> T get(String key, Class<T> type) {
-        return (T) get(key);
+    default <T> Element<T> get(String key, Class<T> type) {
+        return (Element<T>) get(key);
     }
 
     /**

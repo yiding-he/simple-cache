@@ -2,6 +2,7 @@ package com.hyd.simplecache.memcached;
 
 import com.hyd.simplecache.CacheAdapter;
 import com.hyd.simplecache.CacheConfiguration;
+import com.hyd.simplecache.Element;
 import com.hyd.simplecache.SimpleCacheException;
 import com.hyd.simplecache.serialization.SerializerFactory;
 import com.spotify.folsom.BinaryMemcacheClient;
@@ -67,7 +68,7 @@ public class MemcachedAdapter implements CacheAdapter {
     }
 
     @Override
-    public <T> T get(String key, Class<T> type) {
+    public <T> Element<T> get(String key, Class<T> type) {
         try {
             byte[] bytes = getBytes(key);
             if (bytes == null) {

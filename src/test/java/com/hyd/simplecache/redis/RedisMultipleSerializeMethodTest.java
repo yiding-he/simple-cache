@@ -26,6 +26,8 @@ public class RedisMultipleSerializeMethodTest {
         cache.put("user2", user2);
 
         System.out.println(cache.get("user1", User.class));
+        System.out.println(cache.get("user1", User.class).getClass());
         System.out.println(cache.get("user2", User.class));
+        System.out.println(cache.get("user2", User.class).getClass());
     }
 }

@@ -252,7 +252,7 @@ public class SimpleCache {
      */
     @SuppressWarnings("unchecked")
     public <T> T get(String key, Class<T> type) {
-        Element<T> value = this.cacheAdapter.get(key, Element.class);
+        Element<T> value = this.cacheAdapter.get(key, type);
         return value == null ? null : value.getValue();
     }
 

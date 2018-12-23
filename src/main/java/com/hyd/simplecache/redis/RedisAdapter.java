@@ -2,6 +2,7 @@ package com.hyd.simplecache.redis;
 
 import com.hyd.simplecache.CacheAdapter;
 import com.hyd.simplecache.CacheConfiguration;
+import com.hyd.simplecache.Element;
 import com.hyd.simplecache.serialization.Serializer;
 import com.hyd.simplecache.serialization.SerializerFactory;
 import redis.clients.jedis.JedisPoolConfig;
@@ -44,7 +45,7 @@ public class RedisAdapter implements CacheAdapter {
         return serializer.deserialize(bytes);
     }
 
-    private <T> T deserialize(byte[] bytes, Class<T> type) {
+    private <T> Element<T> deserialize(byte[] bytes, Class<T> type) {
         byte tag = bytes[0];
         Serializer serializer = SerializerFactory.getSerializer(tag);
         return serializer.deserialize(bytes, type);
@@ -86,7 +87,7 @@ public class RedisAdapter implements CacheAdapter {
     }
 
     @Override
-    public <T> T get(String key, Class<T> type) {
+    public <T> Element<T> get(String key, Class<T> type) {
         return withJedis(jedis -> {
             if (configuration.getTimeToIdleSeconds() > 0) {
                 jedis.expire(key, configuration.getTimeToIdleSeconds());
