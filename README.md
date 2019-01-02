@@ -8,8 +8,6 @@ simple-cache 支持以下底层实现：
   - EhCache
   - Cache2k
   - caffeine
-  - JCS （开发中）
-  - Guava （开发中）
 - 远程缓存：
   - memcached
   - redis
