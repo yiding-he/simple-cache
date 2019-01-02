@@ -16,18 +16,29 @@ simple-cache 支持以下底层实现：
 
 下面是一个使用例子：
 
-```java
-// 创建一个 SimpleCache 对象
-SimpleCache cache = new SimpleCache(new EhCacheConfiguration());
+#### 创建一个 SimpleCache 对象
 
-// 简单存取
+```java
+SimpleCache cache = new SimpleCache(new EhCacheConfiguration());
+```
+
+#### 简单存取
+
+```java
 cache.put("name", queryName());
 System.out.println("name: " + cache.get("name"));
+```
 
-// 取缓存时指定查询方法，当缓存没有时调用该方法填充缓存并返回
+#### 延迟加载
+
+```java
+// 延迟加载，仅当缓存没有的时候调用获取方法
 User user = cache.get("user", () -> queryUser());
+```
 
-// 异步获取缓存
+#### 异步获取缓存
+
+```java
 // 这个例子中当 60 秒超时后，再次查询缓存会触发后台异步获取，
 // 获取期间仍然返回当前的缓存内容，获取成功后再次查询会返回新值。
 int pageDataExpirySeconds = 60;
