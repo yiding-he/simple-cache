@@ -55,6 +55,8 @@ new SimpleCache(new RedisConfiguration());
 在 Spring Boot 中可以添加多个缓存配置，然后用 `Caches` 类获取各自的 SimpleCache 对象。下面是一个例子：
 
 ```properties
+# application.properties
+
 # memcached instance
 simple-cache.memcached.REMOTE.host=localhost
 simple-cache.memcached.REMOTE.port=11211
@@ -110,3 +112,15 @@ public class Conf {
 }
 ```
 
+### Redis 序列化方式
+
+simple-cache 使用 Redis 时默认使用二进制序列化方式，但是这对文字客户端不友好。如果需要以字符方式序列化（JSON），则可以像下面这样：
+
+```java
+RedisConfiguration c = new RedisConfiguration();
+c.setSerializeMethod(PredefinedSerializeMethod.JSON.getTag());
+```
+
+或者在 application.properties 当中指定
+
+    simple-cache.redis.[cache-name].serialize-method=1
